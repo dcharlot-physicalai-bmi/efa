@@ -1,0 +1,3 @@
+target/
+*.f32
+.DS_Store
