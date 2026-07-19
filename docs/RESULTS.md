@@ -22,6 +22,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | result | measurement |
 |---|---|
 | World model trains | JEPA + autograd + Adam on GPU; 8-step latent fidelity 0.92–0.95 |
+| **Second-order autograd** | `grad()` returns differentiable gradients (Var nodes that backprop again); validated exact (`d²/dx² Σx³=6x`, `Σeˣ`, HNN input-grad training); unlocks train-through-optimization |
 | Acts by planning | full perceive→plan→act loop; value-guided beats trapped energy-descent |
 | Value-RL last mile | MC plateau 23% → **Fitted Value Iteration + target network → 39%** (algorithm, not tooling) |
 | Value-net scaling | clean monotone 23→27→39→**45%** |
@@ -47,6 +48,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | energy-as-verifier (best-of-N, 2D) | **100%** selection; fixes every case Langevin collapsed on |
 | OOD-goal generalization | goal-agnostic distance energy **37→41%** OOD; learned value 51→1%; BC policy 100→7% |
 | nano energy-based-transformer (via verification) | solves a multivalued system feedforward can't (0%); thinks with N |
+| **true EBT — train THROUGH the descent** (2nd-order autograd) | **100%** in-dist on the multivalued system (feedforward 0%); thinks (K=1→6: 22→100%); OOD 64–71%; beats the verification route in accuracy *and* cost |
 | MALA (Metropolis-corrected sampling) | robust composed generation across a wide ε band; **corrected an earlier fragility overclaim** |
 | residual-energy verifier on a real AR model (EDLM) | best-of-N tracks the oracle to **100%** on real sequences |
 
@@ -63,7 +65,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | discover from **REAL data** | **Hudson Bay lynx–hare 1900–1920** | Lotka–Volterra recovered — correct signs + sensible magnitudes |
 
 **Honest boundaries (priced):**
-- *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). The structural advantage needs exact gradients or a genuinely non-conservative baseline. A real negative, not a win.
+- *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). Redone with **exact second-order gradients** it improved (6.8% drift) but naive (1.6%) still won — so the negative is *structural*, not a finite-difference artifact. A real negative, made definitive under the better tooling.
 - *AI-for-math verifier on real Lean/mathlib data* — the verifier mechanism is sound, but lexical *and* general-semantic (MiniLM) embeddings sit at chance: tactic↔goal compatibility is a **formal**, not surface-semantic, property. The bottleneck is a Lean-task-trained encoder, not the energy verifier.
 
 ---

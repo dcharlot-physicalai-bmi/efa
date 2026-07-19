@@ -20,6 +20,8 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_edlm.rs` | residual-energy verifier on a **real autoregressive sequence model** (EDLM) |
 | `ebm_ood_goal.rs` | OOD-goal generalization — goal-agnostic energy generalizes where learned maps collapse |
 | `ebm_mala.rs` | Metropolis-corrected sampling — robust composed generation (and a corrected overclaim) |
+| `ebm_ebt_true.rs` | **the true Energy-Based Transformer** — train THROUGH the unrolled energy descent (2nd-order autograd); 100% in-dist where feedforward is 0%, thinks (K=1→6: 22→100%) |
+| `grad2_test.rs` | second-order autograd validation — `d²/dx² Σx³=6x`, `Σeˣ`, and HNN input-gradient training |
 
 ## Energy-based AI-for-science
 | file | what it demonstrates |
@@ -31,5 +33,6 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_pde.rs` | discover **Burgers'** PDE from spatiotemporal field data (PDE-FIND) |
 | `ebm_reaction.rs` | discover **Fisher–KPP** reaction–diffusion |
 | `ebm_lotka.rs` | discover **Lotka–Volterra** from **real** Hudson Bay lynx–hare data (1900–1920) |
+| `ebm_field.rs` / `ebm_field2.rs` | energy-conserving field surrogate — an **honest negative**: naive force net wins, even with exact 2nd-order gradients |
 
 > Note: these are nano-to-small-scale mechanism-and-method proofs, not deployed systems. See the whitepaper §4 for what is and is not claimed.

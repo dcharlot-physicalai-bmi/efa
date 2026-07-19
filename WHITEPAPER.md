@@ -90,6 +90,7 @@ A dedicated program tested where an energy-based model beats a feedforward basel
 
 - **Zero-shot composition by energy summation:** independently-trained concept energies sum to satisfy conjunctions *never seen jointly* (73–74% on 2–3-way), with a clean thinking curve — a thing feedforward nets structurally cannot do; honestly fragile under naive sampling.
 - **Energy-as-verifier (best-of-N):** the same energies, used to *select* rather than *descend*, reach **100%** and fix every case naive sampling collapsed on — the robust route to System-2. Demonstrated end-to-end on a real autoregressive sequence model (residual-energy verifier, EDLM recipe), tracking the oracle to 100%.
+- **The true Energy-Based Transformer — train *through* the descent.** With second-order autograd now on the fabric (§4), the flagship architecture is the real thing, not a workaround: the model predicts by *K* unrolled steps of energy descent (`ŷ ← ŷ − α·∂E/∂ŷ`) and is trained by backpropagating *through* the whole unrolled descent to the weights. On a multivalued nonlinear system where feedforward regression is structurally **0%** (it averages the ≤4 valid solutions), the descent-trained EBT reaches **100%** in-distribution, with accuracy that *climbs with thinking* (K=1→6: 22→100%) and generalizes OOD (64–71%). This beats the verification route both in accuracy and cost — energy-based prediction that thinks, trained the real way.
 - **OOD generalization:** a *goal-agnostic* distance energy generalizes to out-of-distribution goals (37→41%) where a learned value (51→1%) and a behavior-cloned policy (100→7%) both collapse — with the crucial nuance that the edge requires the energy to be goal-agnostic.
 - **Metropolis-corrected sampling:** makes composed *generation* robust across a wide step-size band where uncorrected Langevin is knife-edge — and it corrected an earlier overclaim (the "fragility" was largely a step-size artifact).
 
@@ -104,7 +105,7 @@ Pointed at scientific data, EFA's energy-minimization becomes law discovery. The
 | discover the invariant | nonlinear pendulum | conservation law, correlation 0.99 |
 | discover from **real data** | **Hudson Bay lynx–hare, 1900–1920** | Lotka–Volterra recovered — correct structure + coefficients |
 
-And an honest boundary: an *energy-conserving surrogate* at field scale did **not** beat a naive force net (the structural advantage needs exact gradients or a non-conservative baseline). The AI-for-math verifier is mechanism-sound but gated on a Lean-task-trained encoder — general embeddings sit at chance, because tactic↔goal compatibility is a *formal*, not a surface-semantic, property.
+And an honest boundary: an *energy-conserving surrogate* at field scale did **not** beat a naive force net — and this held even after redoing it with exact second-order gradients (6.8% vs 1.6% drift), so the negative is structural, not a tooling artifact. The AI-for-math verifier is mechanism-sound but gated on a Lean-task-trained encoder — general embeddings sit at chance, because tactic↔goal compatibility is a *formal*, not a surface-semantic, property.
 
 ---
 
@@ -114,7 +115,7 @@ This section is load-bearing; the credibility of the wins depends on it.
 
 - **Scale.** Everything above is nano-to-small. EFA is **not** claimed to beat frontier transformers at in-distribution capability or at frontier scale. Its demonstrated edge is *narrow* — OOD, composition, verification, thinking, conservation, discovery — not raw capability.
 - **Sampling.** Energy *descent* (Langevin/generation) is step-size sensitive; the robust route is *verification* (best-of-N) or Metropolis correction. This is priced, not hidden.
-- **Exact gradients.** The training-through-optimization that true Energy-Based Transformers and Hamiltonian NNs use needs second-order autograd; the current stack uses finite differences, which caps the energy-conserving-surrogate result.
+- **Exact gradients — now shipped, and it settled one negative.** Ferric now has **second-order autograd** (differentiable gradients: `grad()` returns Var graph nodes that backprop again). This *unlocked* the true Energy-Based Transformer (§3.4). It did **not** rescue the energy-conserving field surrogate: redone with *exact* gradients it improved (8.3%→6.8% drift) but a naive force net (1.6%) still won — confirming the negative was structural, not a finite-difference artifact. Capability gained; one honest boundary made definitive.
 - **AI-for-math.** The verifier mechanism works; real Lean competitiveness is gated on a domain-trained proof-state encoder — a multi-quarter program, not a demo.
 - **Method vs. system.** These are mechanism-and-method proofs on canonical benchmarks, not deployed systems that top leaderboards.
 
@@ -139,7 +140,7 @@ EFA is a Charlot Lab research effort inside the **Institute for Physical AI @ Ba
 ## 6. Roadmap
 
 - **Physics-discovery, deepened:** harder PDEs (KdV/Navier–Stokes), more real measured datasets, systematic noise/sparsity robustness — the robustly-winnable near-term seam.
-- **Exact-gradient tooling on Ferric:** second-order autograd to unlock true energy-conserving surrogates and training-through-optimization (Energy-Based Transformers at nano→small scale).
+- **Exact-gradient tooling on Ferric:** ✅ *done* — second-order autograd shipped and validated; it unlocked the true Energy-Based Transformer (§3.4, train-through-optimization) and settled the field-surrogate negative (§4). Next: scale the descent-trained EBT past the nano multivalued task.
 - **AI-for-math, the real path:** a Lean-task-trained proof-state encoder to feed the (proven) energy verifier — best-of-N proof/answer selection and joint premise-set selection by energy summation.
 - **Scale the unified model** on a benchmark with published comparables, where "capacity floor, then compute" can be measured head-to-head.
 - **Consolidation:** this whitepaper, the public repository, and the `efa.physicalai-bmi.org` ecosystem as the living record.
