@@ -59,6 +59,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | capability | system | result |
 |---|---|---|
 | conserve dynamics (HNN) | oscillator | energy drift **−0.9% vs +5.0%** (5.5× lower) over a long rollout |
+| **port-Hamiltonian** (damped + driven body) | mass–spring–damper + motor | conservation-only HNN fails **130×** on rollout (0.79 vs 0.006 MSE); PHNN ties the black box **and** recovers friction **r=0.300 = true c/m** exactly + gives the energy budget — the honest bridge to embodied control |
 | discover ODE | 2D oscillator | exact governing equation from noisy data |
 | discover ODE (chaos) | **Lorenz** | all 7 terms + coefficients exact, from ~11k noisy chaotic samples |
 | discover PDE | **Burgers** (advection–diffusion) | `u_t = −u·u_x + 0.10·u_xx` exact |
@@ -67,6 +68,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | discover from **REAL data** | **Hudson Bay lynx–hare 1900–1920** | Lotka–Volterra recovered — correct signs + sensible magnitudes |
 
 **Honest boundaries (priced):**
+- *Port-Hamiltonian* — the PHNN does **not** out-*predict* the black box (0.0061 vs 0.0055 MSE; a hair behind). Its win is *structure at parity accuracy*: exact physical-parameter recovery + an energy budget + decisively beating the wrong prior (conservation-only HNN). Not "more accurate," but "accurate **and** accountable."
 - *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). Redone with **exact second-order gradients** it improved (6.8% drift) but naive (1.6%) still won — so the negative is *structural*, not a finite-difference artifact. A real negative, made definitive under the better tooling.
 - *AI-for-math verifier on real Lean/mathlib data* — the verifier mechanism is sound, but lexical *and* general-semantic (MiniLM) embeddings sit at chance: tactic↔goal compatibility is a **formal**, not surface-semantic, property. The bottleneck is a Lean-task-trained encoder, not the energy verifier.
 

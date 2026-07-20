@@ -29,6 +29,7 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | file | what it demonstrates |
 |---|---|
 | `ebm_hamiltonian.rs` | Hamiltonian NN — learn the energy, conserve it (5.5× lower drift) |
+| `ebm_phnn.rs` | **port-Hamiltonian** — energy-accounted model of a damped, *driven* body (a joint + motor); conservation-only HNN fails 130× on rollout, PHNN ties the black box AND recovers friction c/m=0.30 exactly — the bridge to embodied control |
 | `ebm_conserve.rs` | discover a conservation law (nonlinear pendulum invariant, corr 0.99) |
 | `ebm_discover.rs` | discover a governing ODE by sparse energy-min (SINDy-as-EFA) |
 | `ebm_lorenz.rs` | discover the **Lorenz** system (chaos) from noisy data |

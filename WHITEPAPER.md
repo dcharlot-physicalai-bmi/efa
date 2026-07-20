@@ -101,6 +101,7 @@ Pointed at scientific data, EFA's energy-minimization becomes law discovery. The
 | capability | systems | result |
 |---|---|---|
 | conserve dynamics | Hamiltonian NN | energy drift 5.5× lower than a naive net |
+| model an actuated, dissipative body | **port-Hamiltonian NN** (learns dissipation + input port) | conservation-only HNN fails 130× on a damped, driven rollout; PHNN ties the black box **and** recovers friction *c/m*=0.30 exactly + an energy budget |
 | discover the ODE | 2D oscillator · **Lorenz (chaos)** | exact, from noisy data |
 | discover the PDE | **Burgers** (advection–diffusion) · **Fisher–KPP** (reaction–diffusion) | exact |
 | discover the invariant | nonlinear pendulum | conservation law, correlation 0.99 |
