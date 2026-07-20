@@ -50,6 +50,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | nano energy-based-transformer (via verification) | solves a multivalued system feedforward can't (0%); thinks with N |
 | **true EBT — train THROUGH the descent** (2nd-order autograd) | **100%** in-dist on the multivalued system (feedforward 0%); thinks (K=1→6: 22→100%); OOD 64–71%; beats the verification route in accuracy *and* cost |
 | true-EBT scaling (chain of *D* coupled multivalued links) | thinking lifts every case; the paper's stabilizers (randomized K/α + Langevin noise) confirmed on Ferric (D=2 converges in K=3 not 6); ceiling past D≈4 is **capacity, not fundamental** — D=6 plateau rises monotonically **13→25→42%** at width 128→256→512 (still only 42% solved: priced, not crossed) |
+| structure vs scale (weight-shared *local* energy) | **honest negative** — a locality-matched shared energy is *worse*, not better (D=4: **8%** vs the generic net's 78%; solves a single link at 90% then collapses). A naive sum-of-local-energies has no global coordinator; locality alone doesn't buy generalization — the capacity route is the one that scaled |
 | MALA (Metropolis-corrected sampling) | robust composed generation across a wide ε band; **corrected an earlier fragility overclaim** |
 | residual-energy verifier on a real AR model (EDLM) | best-of-N tracks the oracle to **100%** on real sequences |
 
@@ -68,6 +69,17 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 **Honest boundaries (priced):**
 - *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). Redone with **exact second-order gradients** it improved (6.8% drift) but naive (1.6%) still won — so the negative is *structural*, not a finite-difference artifact. A real negative, made definitive under the better tooling.
 - *AI-for-math verifier on real Lean/mathlib data* — the verifier mechanism is sound, but lexical *and* general-semantic (MiniLM) embeddings sit at chance: tactic↔goal compatibility is a **formal**, not surface-semantic, property. The bottleneck is a Lean-task-trained encoder, not the energy verifier.
+
+## VI. Cognitive-science bridges — predictive coding & global workspace
+
+| probe | result |
+|---|---|
+| predictive-coding language twin | an energy-based LM's **prediction energy encodes surprisal** (ρ = **+0.71** vs true context entropy; KL≈0.0006 so it learned the distribution). But inference *effort* does **not** track output-entropy difficulty — steps-to-settle ρ=−0.12, descent-"work" ρ=−0.71 (easy/peaked contexts have deeper basins, so they descend *more*). |
+| Ferric J-lens (averaged ∂output/∂latent) | a sparse-positive latent (13/32 active) shows global-workspace **selectivity** — ablating the top-8 causal directions collapses **flexible/multi-hop** reasoning (100→**31%**) but spares **automatic** report (100→**98%**); causal (J-lens) ranking beats variance ranking (31% vs 41%). |
+
+**Honest boundaries (priced):**
+- *The strong "adaptive compute scales with surprisal" claim is **falsified*** in the controlled entropy task. The reconciliation with the EBT-scaling result: energy-based inference allocates compute to **reasoning-depth** difficulty (longer chains needed more thinking), **not** to output-**uncertainty** difficulty. Surprisal-as-entropy ≠ surprisal-as-reasoning-load; the compute story needs the latter (garden-path / multi-hop), which this task lacked.
+- *The frontier low-variance-high-causal workspace signature does **not** reproduce at nano* — our J-space holds ~35% of variance (≈proportional), not the ~6–7% seen in a large model. The **selectivity** signature is real; the extreme low-variance one appears to be a scale phenomenon.
 
 ---
 
