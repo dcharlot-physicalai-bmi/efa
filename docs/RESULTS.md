@@ -4,6 +4,8 @@ The complete record of experiments behind [the whitepaper](../WHITEPAPER.md). Ev
 
 Discipline: **every claim measured, every limit priced.** Negatives and self-corrections are included on purpose — they are what make the wins credible.
 
+**The metric is joules per task, not tokens.** Compute per task (FLOPs, exact from the model dims) for the embodied-control builds vs LLM inference (`ebm_watts.rs`): energy-shaping swing-up = **110 kFLOP** (microcontroller-scale, ≈0.55 µJ @ 5 pJ/FLOP); MPPI-planned swing-up = 6.2 GFLOP (phone-scale). A **single 7B-LLM token = 14 GFLOP** — so one whole swing-up is **~127,000× less compute than one LLM token**, and the LLM needs a datacenter GPU and still can't run the continuous loop. *Honest caveats: FLOP-count not a wattmeter; the capability here is **nano** (a pendulum) — this shows the **architecture** is edge-compute-viable, not that we have data-center-grade capability yet; the LLM contrast is about **shape**, not just scale.*
+
 ---
 
 ## I. Nano program — every mechanism, proven (in-browser, on-device)
