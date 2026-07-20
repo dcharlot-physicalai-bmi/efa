@@ -61,6 +61,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 |---|---|---|
 | conserve dynamics (HNN) | oscillator | energy drift **−0.9% vs +5.0%** (5.5× lower) over a long rollout |
 | **port-Hamiltonian** (damped + driven body) | mass–spring–damper + motor | conservation-only HNN fails **130×** on rollout (0.79 vs 0.006 MSE); PHNN ties the black box **and** recovers friction **r=0.300 = true c/m** exactly + gives the energy budget — the honest bridge to embodied control |
+| **energy-based CONTROL — architectural match** | underactuated pendulum swing-up (torque ≪ gravity) | a **learned** energy Ê (HNN, RMSE **0.003** vs ½ω²−cosθ, never told the formula) drives energy-shaping swing-up + stabilizes upright (**min\|θ−π\|=0.00**); a naive position controller with the *same* torque limit **cannot** reach upright (stuck **2.44 rad** away — no energy to pump). The energy *structure* is load-bearing for embodied control — the edge is architectural match to physical reality, not toy capability. *(Caveat: near-top stabilizer is a standard local PD; the energy does the underactuated swing-up. Single classic system, nano.)* |
 | discover ODE | 2D oscillator | exact governing equation from noisy data |
 | discover ODE (chaos) | **Lorenz** | all 7 terms + coefficients exact, from ~11k noisy chaotic samples |
 | discover PDE | **Burgers** (advection–diffusion) | `u_t = −u·u_x + 0.10·u_xx` exact |
