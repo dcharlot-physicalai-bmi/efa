@@ -76,7 +76,7 @@ async fn train(ctx: &Arc<ferric_core::Context>, d: usize, l: &Tensor, r: &Tensor
         let afv = Var::leaf(Tensor::from_vec(ctx, &af, &[bs, d - 1])); let bfv = Var::leaf(Tensor::from_vec(ctx, &bf, &[bs, d - 1]));
         let lv = Var::leaf(l.clone()); let rv = Var::leaf(r.clone()); let ov = Var::leaf(one.clone());
         let gv: Vec<Var> = g.iter().map(|t| Var::leaf(t.clone())).collect();
-        let ktr = 3 + (h32(step as u32 ^ 0x51ec) % 8) as usize;
+        let ktr = d + (h32(step as u32 ^ 0x51ec) % (2 * d) as u32) as usize; // FAIR: K ∝ D (local descent needs ~D steps to propagate along the chain)
         let a_step = 0.12 + (h32(step as u32 ^ 0xa17c) % 1000) as f32 / 1000.0 * 0.16;
         let alv = Var::leaf(Tensor::from_vec(ctx, &[a_step], &[1]));
         let mut y = Var::leaf(Tensor::from_vec(ctx, &randn(bs * d, step as u32 * 17 + 3, 0.8), &[bs, d]));
@@ -101,18 +101,19 @@ async fn train(ctx: &Arc<ferric_core::Context>, d: usize, l: &Tensor, r: &Tensor
 fn main() { pollster::block_on(run()); }
 async fn run() {
     let ctx = Arc::new(ferric_core::Context::new().await.unwrap());
-    println!("  EFA energy-first — STRUCTURE vs SCALE: weight-shared local energy (H={}, params INDEPENDENT of D)", H);
+    println!("  EFA energy-first — STRUCTURE vs SCALE, FAIR RE-TEST: weight-shared local energy with K ∝ D descent budget");
+    println!("  (the first run used a FIXED K≤25 which cannot propagate constraints along a long chain — a possible design artifact)");
     let one = Tensor::from_vec(&ctx, &[1.0], &[1]); let al = Tensor::from_vec(&ctx, &[0.2], &[1]);
-    let ks = [3usize, 6, 12, 25];
-    println!("\n  solve accuracy (%) of the SHARED-local-energy EBT vs chain length D   (generic MLP: D6=42% @ width512, D6=12% @ width128):");
-    print!("    D          best-acc  (over K∈{{3,6,12,25}})\n");
-    for &d in &[2usize, 4, 6, 8, 12] {
+    println!("\n  solve accuracy (%) vs D, sweeping the thinking budget K in MULTIPLES of D   (fixed-K≤25 first run: D2/4/6/8/12 = 90/8/2/0/0):");
+    print!("    D            K=D    K=2D   K=4D   K=8D   K=16D  K=32D   | best\n");
+    for &d in &[6usize, 8] {
         let (l, r) = selectors(&ctx, d);
         let g = train(&ctx, d, &l, &r, &one).await;
+        print!("    D={:<2} ({:>2} links) ", d, d - 1);
         let mut best = 0.0f32;
-        for &k in &ks { let a = solve(&ctx, d, &g, &l, &r, &one, &al, k, 400, 7000 + d as u32 * 100).await * 100.0; if a > best { best = a; } }
-        println!("    D={:<2} ({} links)   {:>4.0}", d, d - 1, best);
+        for m in [1usize, 2, 4, 8, 16, 32] { let k = (m * d).max(1); let a = solve(&ctx, d, &g, &l, &r, &one, &al, k, 400, 7000 + d as u32 * 100 + m as u32).await * 100.0; if a > best { best = a; } print!("{:>5.0} ", a); }
+        println!("  | {:.0}", best);
     }
-    println!("\n  ONE tiny shared local energy (~385 params, fixed for all D). If accuracy holds as D grows where the");
-    println!("  generic MLP collapsed, the ceiling was inductive bias, not scale — COMPOSITION beats brute width.");
+    println!("\n  If accuracy now HOLDS as D grows (where fixed-K≤25 collapsed), the earlier 'structure is worse' was a");
+    println!("  BUDGET artifact — local energy needs thinking-time ∝ problem size. If it STILL collapses, the negative is real.");
 }
