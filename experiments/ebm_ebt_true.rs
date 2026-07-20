@@ -5,7 +5,9 @@
 //! real thing (Gladstone/Du 2025, arXiv:2507.02092): predict ŷ by K steps of gradient descent on the energy
 //! (ŷ ← ŷ − α·∂E/∂ŷ), UNROLL those steps, and supervise the endpoint — backprop through the whole unrolled
 //! descent to the weights (2nd order, since each step uses ∂E/∂ŷ). Task = the multivalued nonlinear system
-//! ŷ₀²+ŷ₁²=a ∧ ŷ₀·ŷ₁=b, where feedforward regression structurally FAILS (averages the ≤4 solutions → 0%).
+//! ŷ₀²+ŷ₁²=a ∧ ŷ₀·ŷ₁=b. CORRECTION: earlier text/prints here claimed "feedforward = 0%" — that was ASSERTED,
+//! NOT measured, and is WRONG. A fairly-supervised feedforward solves this at 100% on ~350 params (see ebm_edge.rs).
+//! The EBT's real edge is representing the MULTIVALUED SET (different inits → different valid solutions) + thinking.
 //! The EBT's descent lands on A valid solution, and THINKING (more K at test time) should help.
 //!
 //! Run: `cargo run -p ferric-tensor --example ebm_ebt_true --release`
@@ -75,7 +77,7 @@ async fn run() {
     }
 
     // ---- eval: solve accuracy by energy descent, vs K (thinking), in-dist and OOD ----
-    println!("\n  solve accuracy of the descent-trained EBT vs #thinking steps K (feed-forward regression = 0%, multivalued):");
+    println!("\n  solve accuracy of the descent-trained EBT vs #thinking steps K (multivalued; NOTE: a fair feedforward also solves this — see ebm_edge.rs):");
     print!("     in-distribution (a∈[0.6,1.4]):  ");
     for &k in &[1usize, 3, 6, 12, 25] { print!("K={}:{:>3.0}%  ", k, solve(&ctx, &p, &one, &al, 0.6, 1.4, k, 400, 900).await * 100.0); }
     println!();

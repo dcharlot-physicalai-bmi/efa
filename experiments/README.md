@@ -20,7 +20,8 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_edlm.rs` | residual-energy verifier on a **real autoregressive sequence model** (EDLM) |
 | `ebm_ood_goal.rs` | OOD-goal generalization — goal-agnostic energy generalizes where learned maps collapse |
 | `ebm_mala.rs` | Metropolis-corrected sampling — robust composed generation (and a corrected overclaim) |
-| `ebm_ebt_true.rs` | **the true Energy-Based Transformer** — train THROUGH the unrolled energy descent (2nd-order autograd); 100% in-dist where feedforward is 0%, thinks (K=1→6: 22→100%) |
+| `ebm_ebt_true.rs` | **the true Energy-Based Transformer** — train THROUGH the unrolled energy descent (2nd-order autograd); 100% in-dist, thinks (K=1→6: 22→100%). ⚠ its "feedforward=0%" claim was unmeasured & wrong — see `ebm_edge.rs` |
+| `ebm_edge.rs` | **honest correction** — measures the feedforward baseline the EBT write-ups asserted: a fair feedforward solves the multivalued task at **100% on 354 params** (all sizes). The EBT needs 2641 params + K≥6 thinking to match. The toy was the *wrong* demonstration of the edge thesis (a discrete-token puzzle can't test the *architectural* mismatch that defeats transformers in robots) |
 | `ebm_ebt_scale.rs` | **scaling the true EBT** — chain of D coupled multivalued links; confirms the paper's stabilizers (rand K/α + Langevin) and prices the ceiling as **capacity** (D=6 plateau 13→25→42% with width 128→256→512) |
 | `ebm_ebt_struct.rs` | **structure vs scale** (honest negative) — a weight-shared *local* energy is **worse**, not better (D=4: 8% vs the generic net's 78%); locality alone doesn't buy generalization, the capacity route is what scaled |
 | `grad2_test.rs` | second-order autograd validation — `d²/dx² Σx³=6x`, `Σeˣ`, and HNN input-gradient training |
