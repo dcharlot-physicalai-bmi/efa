@@ -21,6 +21,7 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_ood_goal.rs` | OOD-goal generalization — goal-agnostic energy generalizes where learned maps collapse |
 | `ebm_mala.rs` | Metropolis-corrected sampling — robust composed generation (and a corrected overclaim) |
 | `ebm_ebt_true.rs` | **the true Energy-Based Transformer** — train THROUGH the unrolled energy descent (2nd-order autograd); 100% in-dist where feedforward is 0%, thinks (K=1→6: 22→100%) |
+| `ebm_ebt_scale.rs` | **scaling the true EBT** — chain of D coupled multivalued links; confirms the paper's stabilizers (rand K/α + Langevin) and prices the ceiling as **capacity** (D=6 plateau 13→25→42% with width 128→256→512) |
 | `grad2_test.rs` | second-order autograd validation — `d²/dx² Σx³=6x`, `Σeˣ`, and HNN input-gradient training |
 
 ## Energy-based AI-for-science

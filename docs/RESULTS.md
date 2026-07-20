@@ -49,6 +49,7 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 | OOD-goal generalization | goal-agnostic distance energy **37→41%** OOD; learned value 51→1%; BC policy 100→7% |
 | nano energy-based-transformer (via verification) | solves a multivalued system feedforward can't (0%); thinks with N |
 | **true EBT — train THROUGH the descent** (2nd-order autograd) | **100%** in-dist on the multivalued system (feedforward 0%); thinks (K=1→6: 22→100%); OOD 64–71%; beats the verification route in accuracy *and* cost |
+| true-EBT scaling (chain of *D* coupled multivalued links) | thinking lifts every case; the paper's stabilizers (randomized K/α + Langevin noise) confirmed on Ferric (D=2 converges in K=3 not 6); ceiling past D≈4 is **capacity, not fundamental** — D=6 plateau rises monotonically **13→25→42%** at width 128→256→512 (still only 42% solved: priced, not crossed) |
 | MALA (Metropolis-corrected sampling) | robust composed generation across a wide ε band; **corrected an earlier fragility overclaim** |
 | residual-energy verifier on a real AR model (EDLM) | best-of-N tracks the oracle to **100%** on real sequences |
 
