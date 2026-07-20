@@ -35,6 +35,9 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_plan.rs` | **control by descent (no hand law)** — MPPI plans the swing-up through a *learned* model; the energy pump *emerges* from planning, and capability to reach upright scales with planning **horizon** (compute), 2.44→0.33 rad. Directional — reaches the top but doesn't cleanly stabilize (honest limit) |
 | `ebm_watts.rs` | **the metric = joules/task, not tokens** — exact FLOP accounting: energy-shaping swing-up = 110 kFLOP (microcontroller-scale) vs a single 7B-LLM token = 14 GFLOP (~127,000× more, datacenter). The architecture is edge-compute-viable; the *capability* is still nano (honest caveats in-file) |
 | `ebm_percept.rs` | **scale the body + close the perception loop** — cart-pole (4-D, underactuated) balanced from *noisy position-only* obs. Energy-based state inference (perception = inference to a low-energy explanation) balances (RMS 0.081) where naive finite-diff velocity fails catastrophically (RMS 73.5). The embodied loop closed on a scaled body |
+| `ebm_dropout.rs` | **richer perception** — noise + observation dropout; the energy observer coasts on its dynamics prior through 0–50% occlusion where naive fails from noise (honest limit at 70%) |
+| `ebm_dpend.rs` | **harder body (honest negative)** — chaotic double pendulum; physics fixed (energy drift 0), but invariant discovery by conservation-residual collapses (corr 0.99 single-pendulum → 0.11 chaotic). Method doesn't scale to chaos |
+| `ebm_cartfull.rs` | **full regulation (unresolved)** — cart-centre + balance; the narrow simultaneous-stability region evaded hand-tuning and a coarse 4-D grid; needs proper LQR. Reported, not hidden |
 | `ebm_conserve.rs` | discover a conservation law (nonlinear pendulum invariant, corr 0.99) |
 | `ebm_discover.rs` | discover a governing ODE by sparse energy-min (SINDy-as-EFA) |
 | `ebm_lorenz.rs` | discover the **Lorenz** system (chaos) from noisy data |
