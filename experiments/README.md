@@ -43,5 +43,6 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 |---|---|
 | `ebm_lm_surprisal.rs` | **predictive-coding language twin** — an energy-based LM's prediction energy encodes surprisal (ρ=+0.71), but inference *effort* does **not** track output-entropy difficulty (strong claim falsified); compute scales with reasoning depth, not uncertainty |
 | `ebm_jlens.rs` | **a Ferric J-lens** (averaged ∂output/∂latent, via autograd) — a sparse-positive latent shows the *selectivity* of a global workspace (ablating causal dirs collapses flexible reasoning 100→31%, spares automatic report 100→98%); the frontier low-variance signature does not reproduce at nano |
+| `ebm_garden.rs` / `ebm_garden3.rs` | **garden-path reanalysis** — v1 (`ebm_garden`) was inconclusive by design (circular metric, no commitment); the **bistable-prior** model (`ebm_garden3`) is the real, non-circular result: reversing an early commitment is a **thinking-resolvable compute cost** (garden-path K=1→8: 64→100%; matched controls stay ~93%) |
 
 > Note: these are nano-to-small-scale mechanism-and-method proofs, not deployed systems. See the whitepaper §4 for what is and is not claimed.
