@@ -118,7 +118,22 @@ async fn run() {
         for _ in 0..260 { let uu = vn.ustar(s, g, grid); s = step(s, uu.0, uu.1); }
         if wrap(s[0] - g.0).abs() < 0.35 && wrap(s[1] - g.1).abs() < 0.35 && s[2].abs() < 0.7 && s[3].abs() < 0.7 { reach += 1; } } reach as f32 / n as f32 * 100.0 };
     let rc = run_discrete(&G5); let rf = run_discrete(&G9);
-    let alpha = 0.3f32; let ks = [1usize, 2, 4, 8]; let mut cres: Vec<(usize, f32)> = vec![];
+    let alpha = 0.3f32;
+    // DIAGNOSTIC: at the eval init states, run 8-step descent from warm-start 0 and compare to u* (is the energy flat / wrong / right?)
+    {
+        let mut fc: Vec<Vec<f32>> = (0..8).map(|_| vec![0.0f32; n]).collect();
+        for i in 0..n { let f = feat8(inits[i], goals[i]); for c in 0..8 { fc[c][i] = f[c]; } }
+        let fv: Vec<Var> = (0..8).map(|c| Var::leaf(Tensor::from_vec(&ctx, &fc[c], &[n, 1]))).collect();
+        let (mut cu1, mut cu2) = (vec![0.0f32; n], vec![0.0f32; n]);
+        for _ in 0..8 { let u1v = Var::leaf(Tensor::from_vec(&ctx, &cu1, &[n, 1])); let u2v = Var::leaf(Tensor::from_vec(&ctx, &cu2, &[n, 1]));
+            let u1s = u1v.mul(&u1v); let u2s = u2v.mul(&u2v); let e = enet(&fv, &u1v, &u2v, &u1s, &u2s, &qv, &ov);
+            let gd = grad(&e.sum_all(), &[u1v.clone(), u2v.clone()], None); let d1 = gd[0].value().to_vec().await; let d2 = gd[1].value().to_vec().await;
+            for i in 0..n { cu1[i] = (cu1[i] - alpha * d1[i]).clamp(-UMAX, UMAX); cu2[i] = (cu2[i] - alpha * d2[i]).clamp(-UMAX, UMAX); } }
+        let (mut mag, mut err) = (0.0f32, 0.0f32); for i in 0..n { let us = vn.ustar(inits[i], goals[i], &G5); mag += (cu1[i] * cu1[i] + cu2[i] * cu2[i]).sqrt(); err += ((cu1[i] - us.0).powi(2) + (cu2[i] - us.1).powi(2)).sqrt(); }
+        let e0 = vn.ustar(inits[0], goals[0], &G5);
+        println!("  DIAG: 8-step descended action mean|u|={:.2}, mean|u−u*|={:.2}  (ex0: desc=({:.2},{:.2}) u*=({:.2},{:.2}))\n", mag / n as f32, err / n as f32, cu1[0], cu2[0], e0.0, e0.1);
+    }
+    let ks = [1usize, 2, 4, 8]; let mut cres: Vec<(usize, f32)> = vec![];
     for &kk in &ks {
         let mut s: Vec<[f32; 4]> = inits.clone(); let mut up: Vec<(f32, f32)> = vec![(0.0, 0.0); n]; let mut reach = vec![true; n];
         for t in 0..260 {
@@ -134,9 +149,10 @@ async fn run() {
                 let d1 = gd[0].value().to_vec().await; let d2 = gd[1].value().to_vec().await;
                 for i in 0..n { cu1[i] = (cu1[i] - alpha * d1[i]).clamp(-UMAX, UMAX); cu2[i] = (cu2[i] - alpha * d2[i]).clamp(-UMAX, UMAX); }
             }
-            for i in 0..n { s[i] = step(s[i], cu1[i], cu2[i]); up[i] = (cu1[i], cu2[i]);
-                if t >= 220 && !(wrap(s[i][0] - goals[i].0).abs() < 0.35 && wrap(s[i][1] - goals[i].1).abs() < 0.35 && s[i][2].abs() < 0.7 && s[i][3].abs() < 0.7) { reach[i] = false; } }
+            for i in 0..n { s[i] = step(s[i], cu1[i], cu2[i]); up[i] = (cu1[i], cu2[i]); }
         }
+        // fair with discrete: check the FINAL state once (was per-step in the window — an unfair stricter test)
+        for i in 0..n { if !(wrap(s[i][0] - goals[i].0).abs() < 0.35 && wrap(s[i][1] - goals[i].1).abs() < 0.35 && s[i][2].abs() < 0.7 && s[i][3].abs() < 0.7) { reach[i] = false; } }
         cres.push((kk, reach.iter().filter(|&&b| b).count() as f32 / n as f32 * 100.0));
     }
 
