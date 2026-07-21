@@ -53,4 +53,10 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_jlens.rs` | **a Ferric J-lens** (averaged ∂output/∂latent, via autograd) — a sparse-positive latent shows the *selectivity* of a global workspace (ablating causal dirs collapses flexible reasoning 100→31%, spares automatic report 100→98%); the frontier low-variance signature does not reproduce at nano |
 | `ebm_garden.rs` / `ebm_garden3.rs` | **garden-path reanalysis** — v1 (`ebm_garden`) was inconclusive by design (circular metric, no commitment); the **bistable-prior** model (`ebm_garden3`) is the real, non-circular result: reversing an early commitment is a **thinking-resolvable compute cost** (garden-path K=1→8: 64→100%; matched controls stay ~93%) |
 
+## The physics of intelligence (Krakauer grounding)
+| file | what it demonstrates |
+|---|---|
+| `ebm_expertise.rs` | **intelligence = economy of effort** — as the descent EBT learns, the descent steps to solve *fall* (K*: 8→4; K=4 accuracy 11→100%). Expertise recodes the landscape so the hard problem becomes cheap — fewer watts for the same capability |
+| `ebm_materiality.rs` | **materiality does computation** — disc-packing: abstract random search collapses (59%→0% valid as density rises) while descent on a repulsion energy solves 100% in a few steps. Physics drops the search clauses |
+
 > Note: these are nano-to-small-scale mechanism-and-method proofs, not deployed systems. See the whitepaper §4 for what is and is not claimed.

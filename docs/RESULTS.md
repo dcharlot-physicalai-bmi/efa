@@ -81,6 +81,13 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 - *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). Redone with **exact second-order gradients** it improved (6.8% drift) but naive (1.6%) still won — so the negative is *structural*, not a finite-difference artifact. A real negative, made definitive under the better tooling.
 - *AI-for-math verifier on real Lean/mathlib data* — the verifier mechanism is sound, but lexical *and* general-semantic (MiniLM) embeddings sit at chance: tactic↔goal compatibility is a **formal**, not surface-semantic, property. The bottleneck is a Lean-task-trained encoder, not the energy verifier.
 
+## VI-b. The physics of intelligence (Krakauer grounding)
+
+| probe | result |
+|---|---|
+| **intelligence = economy of effort** | as the descent EBT learns, the compute-to-solve **falls**: steps-to-90% drop 8→4 across training, and at a fixed low budget accuracy climbs (K=4: 11→100%, K=2: 3→76%). Novice can't solve at any K; expert solves at low K — the landscape recodes so the hard problem becomes easy (fewer watts). Bound: K=1 never solves (intrinsic minimum, not zero). |
+| **materiality does computation** | disc-packing: abstract random search finds a valid config in an exponentially vanishing fraction as density rises (59%→0.13%→**0%** @28% density); descent on a repulsion energy solves **100%** in 1→17 steps. The material drops the "no-overlap" clauses — physics does the search. |
+
 ## VI. Cognitive-science bridges — predictive coding & global workspace
 
 | probe | result |
