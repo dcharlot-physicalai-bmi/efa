@@ -54,35 +54,39 @@ async fn run() {
         Tensor::from_vec(&ctx, &(0..HW * HW).map(|i| (u(i as u32, 8) - 0.5) * (2.0 / (HW as f32).sqrt())).collect::<Vec<_>>(), &[HW, HW]), Tensor::zeros(&ctx, &[HW]),
         Tensor::from_vec(&ctx, &(0..HW).map(|i| (u(i as u32, 9) - 0.5) * (1.0 / (HW as f32).sqrt())).collect::<Vec<_>>(), &[HW, 1]), Tensor::zeros(&ctx, &[1]),
     ];
-    let one = Tensor::from_vec(&ctx, &[1.0], &[1]); let mut adam = Adam::new(&p, 0.002); let bs = 256usize;
+    let one = Tensor::from_vec(&ctx, &[1.0], &[1]); let mut adam = Adam::new(&p, 0.002);
     let inet = |s: &Var, pv: &[Var], ov: &Var| { let sp = |z: Var| z.exp().add(ov).log(); sp(s.matmul(&pv[0]).add(&pv[1])).matmul(&pv[2]).add(&pv[3]).matmul(&pv[4]).add(&pv[5]) };
 
-    for step in 0..3500 {
-        // random states across the chaotic regime + their flows
-        let mut sf = vec![0.0f32; bs * 4]; let mut fl = vec![0.0f32; bs * 4];
-        for i in 0..bs { let sd = step as u32 * 3 + i as u32;
-            let t1 = (u(sd, 1) * 2.0 - 1.0) * 3.1; let w1 = (u(sd, 2) * 2.0 - 1.0) * 3.0; let t2 = (u(sd, 3) * 2.0 - 1.0) * 3.1; let w2 = (u(sd, 4) * 2.0 - 1.0) * 3.0;
-            let (f1, f2, f3, f4) = flow(t1, w1, t2, w2);
-            sf[i * 4] = t1; sf[i * 4 + 1] = w1; sf[i * 4 + 2] = t2; sf[i * 4 + 3] = w2;
-            fl[i * 4] = f1; fl[i * 4 + 1] = f2; fl[i * 4 + 2] = f3; fl[i * 4 + 3] = f4; }
-        let sl = Var::leaf(Tensor::from_vec(&ctx, &sf, &[bs, 4]));
+    // PROPER objective (trajectory-variance): I must be CONSTANT along real trajectories and VARY across energy
+    // levels. Only I VALUES are needed (first-order) — far more robust than the pointwise (∇I·flow)² residual.
+    // Build a batch of NT short RK4 trajectories, each TL points; minimize within-trajectory variance of I,
+    // normalized by the across-batch variance (a Rayleigh quotient — invariant to scale, avoids trivial I=const).
+    let (nt, tl) = (48usize, 12usize); let bs = nt * tl; let h = 0.02f32;
+    for step in 0..4000 {
+        let mut sf = vec![0.0f32; bs * 4];
+        for j in 0..nt { let sd = step as u32 * 97 + j as u32 + 1;
+            let (mut t1, mut w1, mut t2, mut w2) = ((u(sd, 1) * 2.0 - 1.0) * 3.0, (u(sd, 2) * 2.0 - 1.0) * 2.8, (u(sd, 3) * 2.0 - 1.0) * 3.0, (u(sd, 4) * 2.0 - 1.0) * 2.8);
+            for t in 0..tl { let b = (j * tl + t) * 4; sf[b] = t1; sf[b + 1] = w1; sf[b + 2] = t2; sf[b + 3] = w2;
+                for _ in 0..12 { // RK4 sub-steps between recorded points — LONGER trajectory so I must be conserved over a wide swath
+                    let k1 = flow(t1, w1, t2, w2); let k2 = flow(t1 + 0.5 * h * k1.0, w1 + 0.5 * h * k1.1, t2 + 0.5 * h * k1.2, w2 + 0.5 * h * k1.3);
+                    let k3 = flow(t1 + 0.5 * h * k2.0, w1 + 0.5 * h * k2.1, t2 + 0.5 * h * k2.2, w2 + 0.5 * h * k2.3); let k4 = flow(t1 + h * k3.0, w1 + h * k3.1, t2 + h * k3.2, w2 + h * k3.3);
+                    t1 += h / 6.0 * (k1.0 + 2.0 * k2.0 + 2.0 * k3.0 + k4.0); w1 += h / 6.0 * (k1.1 + 2.0 * k2.1 + 2.0 * k3.1 + k4.1);
+                    t2 += h / 6.0 * (k1.2 + 2.0 * k2.2 + 2.0 * k3.2 + k4.2); w2 += h / 6.0 * (k1.3 + 2.0 * k2.3 + 2.0 * k3.3 + k4.3); } } }
         let pv: Vec<Var> = p.iter().map(|t| Var::leaf(t.clone())).collect(); let ov = Var::leaf(one.clone());
-        let iv = inet(&sl, &pv, &ov);
-        let gi = grad(&iv.sum_all(), &[sl.clone()], None).remove(0);        // ∇I [bs,4]
-        let flv = Var::leaf(Tensor::from_vec(&ctx, &fl, &[bs, 4]));
-        let dot = gi.mul(&flv).sum_all();                                    // Σ over all (∇I·flow), but we need per-sample
-        let _ = dot;
-        // per-sample conservation residual (∇I·flow) and ‖∇I‖²  via elementwise then column-sum with a ones-vector
-        let onescol = Var::leaf(Tensor::from_vec(&ctx, &vec![1.0; 4], &[4, 1]));
-        let resid = gi.mul(&flv).matmul(&onescol);                           // [bs,1] = ∇I·flow per sample
-        let gnorm = gi.mul(&gi).matmul(&onescol);                            // [bs,1] = ‖∇I‖² per sample
-        let cons = resid.mul(&resid).mean_all();                             // mean (∇I·flow)²
-        let norm1 = gnorm.mean_all().sub(&ov);                               // mean‖∇I‖² − 1
-        let loss = cons.add(&norm1.mul(&norm1).mul(&Var::leaf(Tensor::from_vec(&ctx, &[0.3], &[1]))));
+        let iv = inet(&Var::leaf(Tensor::from_vec(&ctx, &sf, &[bs, 1 * 4])), &pv, &ov); // [bs,1]  (bs = nt·tl)
+        let ir = iv.reshape(&[nt, tl]);
+        let tmean = ir.mean(&[1]);                                 // per-trajectory mean  [nt,1] (keepdim)
+        let within = ir.sub(&tmean).mul(&ir.sub(&tmean)).mean_all();       // mean within-trajectory variance
+        let gmean = iv.mean_all();                                          // global mean
+        let total = iv.sub(&gmean).mul(&iv.sub(&gmean)).mean_all();         // total variance
+        // minimize within-trajectory variance while CONSTRAINING total variance = 1 (penalizes the trivial constant I)
+        let tm1 = total.sub(&ov);
+        let loss = within.add(&tm1.mul(&tm1).mul(&Var::leaf(Tensor::from_vec(&ctx, &[2.0], &[1]))));
         loss.backward();
         let g: Vec<Tensor> = pv.iter().zip(&p).map(|(v, t)| v.grad().unwrap_or_else(|| Tensor::from_vec(&ctx, &vec![0.0; t.numel()], &t.shape))).collect();
         adam.step(&mut p, &g);
     }
+    let _ = grad;
 
     // evaluate: correlation of learned I with the true energy over a fresh set (+ a chaotic rollout conservation check)
     let n = 2000usize; let mut sf = vec![0.0f32; n * 4]; let mut te = vec![0.0f32; n];
