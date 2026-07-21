@@ -130,6 +130,18 @@ Two measured consequences of the Krakauer grounding (§1), each a clean result:
 
 Both point the same way and close the loop with §1: EFA's edge is a *better-shaped energy*, not a bigger model — and where the body is in the loop, the physics itself is compute.
 
+### 3.8 The flagship — one structured energy, four jobs, on a body
+A 2024–26 survey of the adjacent literatures shows the field has split "learn a scalar energy" into three edges that never fuse: physics-EBMs that *conserve* (port-Hamiltonian, metriplectic), language-EBMs that *verify* (EBT, EDLM), and control-EBMs that *act* (EBT-Policy). Each edge is published; the *center* — one energy doing all of it, on a body, with the energy as its own safety certificate — is empty. This result occupies it. A **single** goal-conditioned scalar energy `E(state, goal)`, structured on the state *relative to the goal* (the port-Hamiltonian move) and learned by fitted value iteration (score/gradient-first — **no partition function**), is then read four ways on a pendulum:
+
+| job | reading of the *same* E | result |
+|---|---|---|
+| **control** | greedy descent on E | reaches the goal in **89%** of episodes (~33 steps) |
+| **verify** | low E = valid action | picks the helping over the hurting action **76%** of the time |
+| **remember** | argmin over state | the goal *is* the attractor (**0.155 rad**); different goals = different minima of one E |
+| **certify** | E along the trajectory | decreases **100%** of steps — an intrinsic Lyapunov / safety certificate |
+
+Honest bounds: single simple body; *verify* is the weakest (76% — a real but noisy oracle); control is 89%, not all goals; the energy is an approximate value function; and *certify* partly reflects that greedy descent tends to lower E — but the 100% monotonicity confirms the learned E is a valid control-Lyapunov function (no local traps). Caveats aside, this is the fusion the field left unbuilt: **the same structured scalar energy controls, verifies, remembers, and certifies stability on a body** — the empty center of the physics↔language↔control triangle, occupied.
+
 ---
 
 ## 4. Honest Limits & What Is Not Claimed

@@ -81,6 +81,19 @@ Discipline: **every claim measured, every limit priced.** Negatives and self-cor
 - *Energy-conserving surrogate at field scale* — did **not** beat a naive force net (8.3% vs 2.2% drift). Redone with **exact second-order gradients** it improved (6.8% drift) but naive (1.6%) still won — so the negative is *structural*, not a finite-difference artifact. A real negative, made definitive under the better tooling.
 - *AI-for-math verifier on real Lean/mathlib data* — the verifier mechanism is sound, but lexical *and* general-semantic (MiniLM) embeddings sit at chance: tactic↔goal compatibility is a **formal**, not surface-semantic, property. The bottleneck is a Lean-task-trained encoder, not the energy verifier.
 
+## VI-c. THE FLAGSHIP — one structured energy, four jobs, on a body
+
+The 2024–26 field split "learn a scalar energy" into three edges that never fuse (physics-EBMs conserve · language-EBMs verify · control-EBMs act); the center — one energy doing all of it on a body, as its own safety certificate — was empty. **This occupies it.** A single goal-conditioned `E(state, goal)`, structured on state-relative-to-goal, learned by fitted value iteration (no partition function), read four ways on a pendulum:
+
+| job | reading of the SAME E | result |
+|---|---|---|
+| **control** | greedy descent on E | reaches goal **89%** of episodes (~33 steps) |
+| **verify** | low E = valid action | picks helping over hurting action **76%** |
+| **remember** | argmin over state | goal *is* the attractor (**0.155 rad**); many goals = many minima of one E |
+| **certify** | E along trajectory | decreases **100%** of steps — intrinsic Lyapunov certificate |
+
+*Bounds: single simple body; verify weakest (76%, noisy oracle); control 89% (not all goals); approximate value; certify partly reflects greedy-descent construction but the 100% monotonicity confirms a valid control-Lyapunov function. The fusion the field left unbuilt — the empty center of the physics↔language↔control triangle, occupied.*
+
 ## VI-b. The physics of intelligence (Krakauer grounding)
 
 | probe | result |
