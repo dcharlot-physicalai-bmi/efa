@@ -111,8 +111,7 @@ async fn run() {
                 let (rcc, rss, omm, ctt, stt): (Vec<f32>, Vec<f32>, Vec<f32>, Vec<f32>, Vec<f32>) = (0..n).map(|i| { let d = th[i] - gg[i]; (d.cos(), d.sin(), om[i], th[i].cos(), th[i].sin()) }).fold((vec![], vec![], vec![], vec![], vec![]), |mut a, x| { a.0.push(x.0); a.1.push(x.1); a.2.push(x.2); a.3.push(x.3); a.4.push(x.4); a });
                 let rcv = Var::leaf(Tensor::from_vec(&ctx, &rcc, &[n, 1])); let rsv = Var::leaf(Tensor::from_vec(&ctx, &rss, &[n, 1])); let omv = Var::leaf(Tensor::from_vec(&ctx, &omm, &[n, 1])); let ctv = Var::leaf(Tensor::from_vec(&ctx, &ctt, &[n, 1])); let stv = Var::leaf(Tensor::from_vec(&ctx, &stt, &[n, 1]));
                 for _ in 0..kdesc {
-                    let u2: Vec<f32> = ucur.iter().map(|&x| x * x).collect();
-                    let uv = Var::leaf(Tensor::from_vec(&ctx, &ucur, &[n, 1])); let u2v = Var::leaf(Tensor::from_vec(&ctx, &u2, &[n, 1]));
+                    let uv = Var::leaf(Tensor::from_vec(&ctx, &ucur, &[n, 1])); let u2v = uv.mul(&uv);   // u² IN-GRAPH (correct ∂E/∂u)
                     let qval = enet7(&rcv, &rsv, &omv, &ctv, &stv, &uv, &u2v, &qv, &ov);
                     let gu = grad(&qval.sum_all(), &[uv.clone()], None);
                     let du = gu[0].value().to_vec().await;
