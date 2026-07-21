@@ -94,6 +94,8 @@ The 2024–26 field split "learn a scalar energy" into three edges that never fu
 
 *Bounds: single simple body; verify weakest (76%, noisy oracle); control 89% (not all goals); approximate value; certify partly reflects greedy-descent construction but the 100% monotonicity confirms a valid control-Lyapunov function. The fusion the field left unbuilt — the empty center of the physics↔language↔control triangle, occupied.*
 
+**+ the LANGUAGE edge fused** (`ebm_lang.rs`): the goal is now a **discrete symbolic instruction** the energy must *decode* through a **learned embedding** — not handed the goal coordinate. One `E(state, instruction)` over 6 commands: **REMEMBER — each instruction's energy-minimum lands 0.069 rad (~4°) from that command's goal → the energy genuinely decoded the language**; CERTIFY 95%; VERIFY 75%; **CONTROL 61% (honest weak spot)**. The decoding is solved (0.069); greedy control degrades off-goal because the relative-to-goal structuring was deliberately withheld to make it genuinely language — the same "better-shaped energy" lever, applied to the *path*. A symbolic command → one structured energy → verify/remember/certify on a body = the full physics↔language↔control centre.
+
 ## VI-b. The physics of intelligence (Krakauer grounding)
 
 | probe | result |

@@ -59,4 +59,10 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | `ebm_expertise.rs` | **intelligence = economy of effort** — as the descent EBT learns, the descent steps to solve *fall* (K*: 8→4; K=4 accuracy 11→100%). Expertise recodes the landscape so the hard problem becomes cheap — fewer watts for the same capability |
 | `ebm_materiality.rs` | **materiality does computation** — disc-packing: abstract random search collapses (59%→0% valid as density rises) while descent on a repulsion energy solves 100% in a few steps. Physics drops the search clauses |
 
+## The flagship — one structured energy, four jobs, on a body (the empty center of the triangle)
+| file | what it demonstrates |
+|---|---|
+| `ebm_oneenergy.rs` | **one goal-conditioned energy, four jobs** — the SAME learned E(state,goal) controls (89%), verifies (76%), remembers (goal=attractor, 0.155 rad), certifies stability (100% Lyapunov) on a pendulum. Score-first, no partition function. The empty center of the physics↔language↔control triangle, occupied |
+| `ebm_lang.rs` | **the language edge fused** — the goal is a symbolic INSTRUCTION the energy *decodes* from a learned embedding (not handed the goal). One E(state,instruction) over 6 commands: decodes the language cleanly (each command's energy-min at its goal, 0.069 rad), certifies (95%), verifies (75%); control 61% (honest weak spot — off-goal landscape). Full physics↔language↔control centre |
+
 > Note: these are nano-to-small-scale mechanism-and-method proofs, not deployed systems. See the whitepaper §4 for what is and is not claimed.
