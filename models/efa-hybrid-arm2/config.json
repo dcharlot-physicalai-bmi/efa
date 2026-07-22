@@ -1,0 +1,14 @@
+{
+  "architecture": "efa-hybrid-v0",
+  "description": "EFA hybrid actuation: v = -kappa*grad_a(E) + w. One scalar potential E(s,a,t) actuates (descend) and verifies (E(.,1): low = valid); a small l2-penalized correction w closes the scalar-fit gap.",
+  "hidden": 96,
+  "kappa": 2,
+  "lambda": 0.1,
+  "params": 21219,
+  "features": "[cos(th1-g1), sin(th1-g1), om1, cos(th2-g2), sin(th2-g2), om2, sin(th1), sin(th2)] + [a1, a2, t]",
+  "env": {"type": "coupled-2-link-chain", "dt": 0.05, "umax": 4, "coupling": 0.5, "damping": 0.05, "gravity": "sin"},
+  "inference": "a=0; for k in 0..K { t=k/K; a += (-kappa*grad_a E(s,a,t) + w(s,a,t))/K }; K=2 recommended",
+  "metrics": {"actuate_K2": 100.0, "verify": 94.0, "potential_field_share": 65.2},
+  "seed_offset": 0,
+  "gate": "actuate>=95 && verify>=90, best-of-<=3 seeds (FVI seed variance disclosed)"
+}

@@ -1,0 +1,12 @@
+{
+  "architecture": "efa-flow-v0",
+  "description": "EFA flow-matching actuation for a 3-joint coupled chain: velocity field v(s,a,t) integrated K forward passes from a=0. Corrected 2026 recipe (no iterative energy descent over actions, no BPTT).",
+  "hidden": 96,
+  "params": 11235,
+  "features": "[cos(thi-gi), sin(thi-gi), omi for i=1..3, sin(th1..3)] + [a1, a2, a3, t]",
+  "env": {"type": "coupled-3-link-chain", "dt": 0.05, "umax": 4, "coupling": 0.5, "damping": 0.05, "gravity": "sin"},
+  "inference": "a=0; for k in 0..K { t=k/K; a += v(s,a,t)/K }; K=1 sufficient",
+  "metrics": {"reach_K1": 100.0, "reach_K2": 100.0, "discrete_teacher_baseline": "57% at 152 evals/decision (flagship run)"},
+  "seed_offset": 0,
+  "gate": "reach_K1>=95, best-of-<=3 seeds (FVI value-training seed variance disclosed; multi-seed study: 2/3 lightened seeds passed)"
+}
