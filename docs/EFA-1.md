@@ -5,6 +5,32 @@ post-transformer model for Physical AI — the class of artifact a Liquid-AI-ilk
 identity. Positioning is being verified against a live mid-2026 sweep (Liquid, Poolside, Logical Intelligence,
 Adaptive, genetic/deterministic AI); this spec states what we build and how it is measured._
 
+## Positioning (mid-2026 sweep, adversarially verified — 23 sources, 14 confirmed findings)
+
+**A fresh landscape check overrode the training-weight framing** (the standing rule after the last frontier check). The
+term to lead with is **"Energy-Based Model," not "post-transformer."** At product level in 2026, *no vendor foregrounds
+"post-transformer" or "liquid network"* — Liquid AI markets "hybrid architecture"; the one shipping commercial exemplar
+of our exact family is **Logical Intelligence** (Kona 1.0, 26 Jun 2026; **Yann LeCun founding board chair**), which
+markets **"Energy-Based Model"** and the deterministic frame **"Certainty, Not Probability."** EBM is the banner with
+both academic pedigree *and* a shipping exemplar. EFA-1's identity: **an energy-based, certified, deterministic,
+multi-body control model** — concrete verifiable qualifiers, not a contested academic banner.
+
+**The comparables, current state (cite these, not my priors):**
+- **Liquid AI** — strongest edge comparable. LFM2.5 family (Jan 2026) + LFM2.5-230M (Jun 2026), "hybrid architecture," measures **tok/s + memory, zero watts/joules in any 2026 release.** Physical AI = a language *skill-selection layer* over NVIDIA SONIC on a Unitree G1 — **not a control model.**
+- **Logical Intelligence** (the sharpest neighbor) — token-free EBM reasoning that *validates system states beneath AI stacks* ("Certainty, Not Probability"); sells proof/certification for failure-intolerant deployments. **On our certified/energy-gated seam — but as verification infrastructure, not embodied control, and single-purpose, not multi-body.**
+- **Cosine** (Lumen Sovereign) — transformer-lineage sovereign code/enterprise LLM; identity = sovereignty & compute provenance. Orthogonal.
+- **Adaptive ML** — **acquired by Datadog (30 Jun 2026)**, folded into Datadog AI Research; was an RLOps platform tuning *others'* models, never a foundation model. Cite as historical.
+- **"Genetic intelligence"** — not a company; = LLM-as-mutation evolutionary program search (FunSearch → AlphaEvolve → ShinkaEvolve/OpenEvolve; Darwin Gödel Machine, SWE-bench 20→50%). **Critically, that lineage *abandons* formal certificates for empirical benchmark validation** — the opposite of EFA's cert seam. We use seeded ES as a *tool*, not as the identity.
+- **Determinism** — a *solved-but-unshipped engineering* problem (Thinking Machines: the cause is batch non-invariance, ~1.6× overhead). **No physical-AI product ships bit-reproducibility.**
+
+**The empty center (EFA-1's honest slot).** Each of EFA-1's four identity metrics is *unclaimed at product level*:
+**joules-per-task** — unclaimed by everyone, even Liquid; **certified/verified action** — flanked by Logical Intelligence
+but for *verification infra*, not control; **determinism** — available but shipped by no physical-AI product;
+**multi-body-per-weights control** — unclaimed by any surviving comparable (the nearest physical-AI datapoint is Liquid's
+*language-only* skill-selection). EFA-1's differentiator against the sharpest neighbor is one sentence: **Logical
+Intelligence *verifies* beneath the stack; EFA-1 *controls* the body — energy-gated, on many bodies, measured in joules,
+reproducible bit-for-bit across fabrics.**
+
 ## The identity (what "SOTA" means here)
 
 **Token throughput and parameter count are meaningless in this architecture class, and EFA-1's card refuses them.**
