@@ -8,6 +8,8 @@ scalar fit cannot express.
 Charlot Lab · Institute for Physical AI @ Bailey Military Institute.
 Runtime: [Ferric](https://ferric.physicalai-bmi.org) (pure-Rust, cross-fabric: Metal / WebGPU / Vulkan / browser).
 
+**▶ Live demo — steer these exact weights in your browser (fetched from this repo, run on-device, no GPU):** https://physicalai-bmi.org/assets/sims/efa-weights
+
 ## What this is (and is not)
 
 This is a **proof-point checkpoint**, not a capability release: a tiny (~50k-param) goal-conditioned controller for a
