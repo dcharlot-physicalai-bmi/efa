@@ -7,7 +7,7 @@ chain** (6-D state, 3 torques): a velocity field `v(s,a,t)` integrated **K forwa
 Charlot Lab · Institute for Physical AI @ Bailey Military Institute.
 Runtime: [Ferric](https://ferric.physicalai-bmi.org) (pure-Rust, cross-fabric: Metal / WebGPU / Vulkan / browser).
 
-**▶ Live demo — steer these exact weights in your browser (fetched from this repo, run on-device, no GPU):** https://physicalai-bmi.org/assets/sims/efa-weights
+**▶ Live demo — steer these exact weights in your browser (fetched from this repo, run on-device, no GPU):** https://physicalai-bmi.org/assets/sims/efa-weights · **WebGPU via Ferric-WASM:** https://ferric.physicalai-bmi.org/efa
 
 ## Why this model matters
 
