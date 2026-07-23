@@ -1,0 +1,11 @@
+{
+  "architecture": "efa-2-pendulum",
+  "description": "EFA-2 v0: the EFA recipe (flow actuation + contrastive verify potential) on the FIRST EXTERNAL body — Gym Pendulum-v1, exact published spec (swing-up, |u|<=2). Distills a grid-DP demonstrator; measured on the spec's own metric.",
+  "hidden": 96, "params": 19874,
+  "env": {"spec": "Pendulum-v1 (gymnasium classic_control)", "dt": 0.05, "g": 10.0, "m": 1.0, "l": 1.0, "max_torque": 2.0, "max_speed": 8.0, "episode": 200, "reward": "-(angle_norm(th)^2 + 0.1*thdot^2 + 0.001*u^2)", "start": "th~U(-pi,pi), thdot~U(-1,1)"},
+  "observation": "[cos(th), sin(th), thdot] — the env's own observation vector",
+  "inference": "act K=1: u = clamp(flow(obs, a=0, t=0), +-2). K>1: a += flow(obs, a, k/K)/K. verify: potential(obs, a) — lower is more valid.",
+  "identity_card": {"mean_return_K1": -142.6, "mean_return_K2": -127.9, "mean_return_K4": -125.8, "teacher_DP": -124.5, "anchor_SB3_SAC": -150.0, "anchor_random": -1200.0, "upright_pct": 100, "verify_pct": 98.1, "deterministic": true, "tau_95pct": 2.15},
+  "honesty": "Distills a MODEL-BASED DP demonstrator (known dynamics) — the claim is SOTA-level control on the published metric at 1 forward pass with verify+determinism, NOT beating SAC at model-free RL. One seed. Escalation measured at ~0.1% (K=1 already succeeds closed-loop; the gate prices, it does not rescue here).",
+  "gate": "return@K1 >= -160 && upright == 100% && verify >= 90% && bit-exact && reload-exact"
+}
