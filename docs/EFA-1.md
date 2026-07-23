@@ -146,7 +146,12 @@ decide(state, goal, body, seed):
   (native ⇄ WASM bit-comparison), card written from measurements only.
 
 Release: `physicalai-bmi/efa-1` — safetensors + config (env specs, τ, certificates, escalation policy) + the honest
-card + Ferric loader + both browser demos upgraded to EFA-1.
+card + Ferric loader + both browser demos upgraded to EFA-1. **All shipped**: the pure-JS page
+([physicalai-bmi.org/assets/sims/efa-weights.html](https://physicalai-bmi.org/assets/sims/efa-weights.html)) and the
+Ferric-WASM WebGPU page ([ferric.physicalai-bmi.org/efa](https://ferric.physicalai-bmi.org/efa)) both default to the
+EFA-1 tab — one trunk, three switchable bodies, the **agency gate live in the HUD** (E vs the τ shipped in
+config.json, per decision; on the WebGPU page the gate runs inside the WASM call). Both headless-verified: gate reads
+per-body τ (2.38/1.88/1.55), verify 91–96% at random probes, at-goal on body switch, zero console errors.
 
 ## Honest scope (stated before building)
 
