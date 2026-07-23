@@ -41,9 +41,28 @@ Direct pattern writes (no consolidation guarantee yet); synthetic context vector
 embeddings; 1-DOF body (the body is deliberately not the point — the shipped artifact closes the loop at 100% when
 handed the right goal). One seed everywhere; hash-deterministic.
 
+## Stage 2 DONE — sequence attractors: the program counter is an attractor (`experiments/ebm_efam2.rs`)
+
+The suites where RoboMME's perceptual memory loses to symbolic (counting, imitation), solved as **chained attractor
+dynamics**: the task program is a heteroassociative chain ξ₀→ξ₁→… (each phase carries a goal readout to the shipped
+efa-1); arrival events step the chain; **no counter variable exists anywhere in the agent**.
+
+| gate | result |
+|---|---|
+| counting — "touch A exactly N times, then settle at B" (harness-counted) | **100% for every N ∈ 1..5** (memoryless: 0%) |
+| procedural replay (8-waypoint pattern) | **100%**, waypoint RMS 0.101 rad |
+| mid-sequence content-addressable entry (25%-corrupted cue, random phase) | **100%** (200 trials) — a frame buffer can't do this without search |
+| associative cleanup under program-counter corruption (σ=0.6) | 70% → **95%** with the energy-gated settle |
+| price · determinism | 5.5 kFLOP/chain-step ≈ 14% of a decision · bit-exact ✓ |
+
+**The fix that got there is itself a result:** the first run failed counting (25–77%) because the chain-step event
+demanded settling within 0.15 rad — tighter than the artifact's own *certified* attractor residual (≤0.32 rad) — and
+the harness counted band fly-throughs as visits. **The certificate supplied the legitimate event criterion** —
+the certified residual bound is now operationally load-bearing, not just a claim on a card. (Recorded negative:
+first-run event criterion untestably tight; same class as the cert1 harness bug.)
+
 ## The staged program from here
-1. **Sequence attractors** (temporal/procedural memory): limit-cycle storage per Long-Sequence-Hopfield theory —
-   counting and imitation suites, where RoboMME's perceptual memory loses to symbolic; no VLM, no 3–5× compute.
+1. ~~Sequence attractors~~ — **done above.**
 2. **Certified consolidation**: Hebbian fast-weight writes with a Lyapunov-style convergence guarantee — what
    RoboTTT's TTT does, but verified (our certificate machinery pointed at the memory write).
 3. **Perceptual front-end**: contexts from real embeddings (start: our own sim observations; then RoboMME's
