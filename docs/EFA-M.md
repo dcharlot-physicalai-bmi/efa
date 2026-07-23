@@ -111,9 +111,35 @@ clutter moves — average 8 frames; arm ~1/K, noise ~1/√K, landmarks persist).
 0.687→1.000 AUROC, margin restored. Perception for memory is an *invariance* problem before it is a *features*
 problem — measured, not asserted.
 
-## The staged program from here
-1. ~~Sequence attractors~~ 2. ~~Certified consolidation~~ 3. ~~Perceptual front-end~~ — **all done.**
-4. **The public stake**: DAM-as-Modulator on a π0.5-class backbone = the missing 15th variant on RoboMME's
-   leaderboard (CVPR 2026 challenge, ManiSkill observations + learned encoders), + the position paper for CoRL Nov 9.
-5. **Hidden-property attractors**: basins over latent physical parameters updated by interaction — memory and
-   system identification unified in one energy.
+## Stage 5 DONE — hidden-property attractors: memory ∩ system-identification (`experiments/ebm_efam5.rs`)
+
+The combination nobody is adjacent to: PhyPush infers a physical property but re-infers every encounter; RoboMME
+recalls identity but infers no property. EFA-M does both in one energy — **identify a latent parameter from
+interaction, store it as an attractor keyed by the object's perceptual identity (stage 4), recall it without
+re-probing, gate on two confidences, and correct the shipped efa-1.**
+
+*Choosing the parameter was itself the result — two recorded negatives:* (A) a constant **load bias** the feedback
+policy silently **absorbs** (reach stays 100% — nothing to compensate); (B) an **actuator gain** that genuinely
+degrades reach but where naive output-rescaling u/k̂ makes it **worse** (saturates, overshoots) and no scaling can
+manufacture missing torque. The clean case is (C) a **sensor/mounting offset δ** — the controller drives the
+*observed* angle to goal so the *true* angle settles off by δ, and the feedback loop **cannot self-correct** (it
+thinks it succeeded). Gravity depends on the true angle, so interaction leaks δ (δ̂ = argmin SSE over the probe log).
+
+| gate | result |
+|---|---|
+| identification sharpens with interaction | |δ̂−δ|: 0.140 (K=5) → 0.022 (K=40) → 0.015 (K=80) |
+| **control: nominal vs identified+corrected** across |δ| | nominal **100→92→58→20→0%**; corrected **100%** throughout |
+| re-encounter, TRUE reach | recall-only 83% · re-probe-every-time 100% · no-memory 42% · **GATED(recall+verify) 100% at 23% of the probe cost** |
+| two-confidence gate | recognize AUROC 0.984; posterior width K=5 0.089→"probe", K=40 0.027→"act"; aliasing 20/20 stale recalls caught → re-probe, 0 poison |
+| price · determinism | recall 8.2 kFLOP, 0 probes on re-encounter · bit-exact ✓ |
+
+The GATED number is the thesis in one line: **100% reach at 23% probe cost — memory pays where the energy is
+confident, interaction pays where it isn't.** Remember / verify / adapt / *price*, all from one energy object,
+now including the object's physics. Honest scope: 1-DOF sensor offset as the single parameter (mass/friction/
+multi-param = the extension); stage-4 perceptual stand-in; one seed.
+
+## The staged program from here — mechanism program COMPLETE (stages 1–5)
+1. ~~Recall + certificate~~ 2. ~~Sequences~~ 3. ~~Certified consolidation~~ 4. ~~Perceptual front-end~~
+5. ~~Hidden-property attractors~~ — **all done, all measured on the shipped artifact.**
+- **The public stake** (next): DAM-as-Modulator on a π0.5-class backbone = the missing 15th variant on RoboMME's
+  leaderboard (CVPR 2026 challenge, ManiSkill observations + learned encoders), + the position paper for CoRL Nov 9.
