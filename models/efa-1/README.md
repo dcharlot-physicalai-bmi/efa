@@ -78,12 +78,18 @@ value is *calibrated difficulty detection and compute pricing*, not rescue; the 
   grid nodes over the FULL physical domain (θ on the whole circle × ω in the measured transient envelope) provably
   enter that contraction core** — 1,353 / 74,529 / 456,533 nodes per body, median entry 34 / 62 / 66 steps, zero
   no-entries, worst sampled funnel expansion σ_P(Φ) = 117.5 / 18.1 / 59.3.
+  **Multi-goal: ALL 12 (body, goal) pairs — every card goal on every body — certify at 100.0% of the full physical
+  domain** (per-goal attractors and cores in `certificates_multigoal`; core radii 0.25–1.20, goal-dependent).
   Limits stated plainly: grid-sampled and node-local — no claim between nodes (the measure-zero separatrix lies there);
-  not an interval/SMT proof (orbit-tube bounds are the named rigorous route); one representative goal certified per
-  body. The recorded negatives that shaped the method: identity-metric contraction fails (24.5/2.6/0.1%); a full-circle
-  one-step metric field must fail (topological obstruction); cell-granular region-growth stalls when the core is
-  smaller than a grid cell. The harness was validated first: the certifying reconstruction reproduces the shipped card
-  100/100/100 before any number was trusted. Provenance: `experiments/ebm_efa1cert{,2,3,4}.rs`.
+  not an interval/SMT proof. The continuum gap is *quantified, not hand-waved*: scalar orbit-tube bounds were computed
+  and **fail honestly** (`certificates_tube` — the norms-product bound loses the directional cancellation that the
+  measured funnel expansion σ_P(Φ) = 18–117 enjoys; full-coverage grids would need infeasible node counts). The
+  rigorous continuum route is named: matrix/ellipsoidal tubes, then interval/CROWN bound propagation with
+  branch-and-bound — neural-verification tooling, a real project. The recorded negatives that shaped the method:
+  identity-metric contraction fails; a full-circle one-step metric field must fail (topological obstruction);
+  cell-granular region-growth stalls when the core is smaller than a grid cell. The harness was validated first:
+  the certifying reconstruction reproduces the shipped card 100/100/100 before any number was trusted.
+  Provenance: `experiments/ebm_efa1cert{,2,3,4,5}.rs`, `experiments/ebm_efa1tube.rs`.
 - Underactuated bodies remain a measured open boundary (ledger). EFA-2 targets a standard external body
   (MuJoCo / SO-101-LeRobot) so comparisons become externally reproducible.
 
