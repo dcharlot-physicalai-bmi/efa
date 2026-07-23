@@ -30,6 +30,7 @@ no meaning; the identity axes are:
 | verification | the model's **own potential** ranks good actions below bad, per body (97–99%) |
 | energy | ~39 kFLOP **per decision** — vs a discrete Gᵈ planner's 7× / 31× / **140×** more as DOF grows |
 | safety | **certified closed loop**: exponential stability at every measured attractor (ρ(A)<1) + a grid-sampled contraction basin per body (Lyapunov P-metric; limits disclosed below) |
+| agency | **energy-gated tool ladder** (K=1 → K=4 → planner tool → seeded ES, all deterministic): escalates on ≤0.2% of in-distribution decisions, **17× more on out-of-band goals** — the model's own energy detects difficulty and prices the extra compute (78→161 kFLOP/decision) |
 | determinism | same (state, goal) ⇒ same action, **bit-for-bit**; Ferric extends this cross-fabric (Metal ⇄ WebGPU) |
 | generality | **3 bodies per weights file** (1-, 2-, 3-joint coupled chains), one learned embedding row each |
 | footprint | ~39k params ≈ 160 KB — stated as *footprint*, never as capability |
@@ -46,6 +47,17 @@ The **coordinated energy family on one latent** (the corrected 2026 recipe, end-
 
 Inference (from `config.json`): `u = clamp(flow(feat, a=0, t=0, emb[body])[:dof])`; verify any candidate action by
 `potential(feat, a, emb[body])`.
+
+## The agency loop (in `config.json` → `agency`)
+
+The model's **own energy decides when to think harder and when to reach for tools** — every path seeded, the full
+ladder bit-exact deterministic (measured): `L1` flow K=1 → if E>τ `L2` flow K=4 → `L3` planner tool (discrete argmin
+over the model's own potential) → `L4` seeded evolution search; execute the argmin-E candidate. τ per body ships in the
+config (95th percentile of validation energy — calibrated from the artifact alone). Measured behavior: in-distribution
+the energy is content (≤0.2% escalation, cost ≈ the K=1 baseline); on goals **outside the training band** escalation
+rises 17× on the 3-DOF body and mean cost prices honestly (78→161 kFLOP/decision). Stated plainly: at this scale the
+tools bought **no additional reach** — K=1 already generalizes to 93–100% out-of-band — so the ladder's demonstrated
+value is *calibrated difficulty detection and compute pricing*, not rescue; the L4 genetic tool never fired at natural τ.
 
 ## Lineage & honesty (read before using)
 

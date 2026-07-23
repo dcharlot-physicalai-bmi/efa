@@ -40,6 +40,25 @@ one-step contraction fails (24.5/2.6/0.1%) — the loop contracts in the **Lyapu
 (σmax(P^½JP^-½)<1, AᵀPA−P=−I), the same correction ebm_contract found on the single body. Limits stated: grid-sampled
 (rigorous = interval/CROWN), one goal certified per body, constant P (a state-dependent metric would certify more).
 
+### Stage D done — the agency loop, measured on the shipped artifact (`experiments/ebm_efa1agency.rs`)
+
+The spec's ladder is now in the artifact (`config.json` → `agency`): **L1 flow K=1 → (E>τ) L2 flow K=4 → L3 planner
+tool (argmin over the model's own potential) → L4 seeded ES; execute argmin-E; full ladder bit-exact deterministic
+(measured, tools included).** τ per body = 95th pct of validation energy, calibrated from the artifact alone
+(2.38/1.88/1.55). Measured:
+
+| eval | body | reach K1 / agency | escalation L2/L3/L4 (% of decisions) | mean kFLOP/decision |
+|---|---|---|---|---|
+| in-dist | 1/2/3-DOF | 100/100/100 = same | ≤ 0.2 / 0.2 / 0.0 | 77.9–90.7 |
+| OOD goals (|g|∈[1.05,1.35], outside ±1.0 training band) | 1/2/3-DOF | 100/93/98 = same | up to **3.4 / 1.3** / 0.0 | up to **161.1** |
+
+Two findings, both stated plainly: (1) **the energy is a calibrated difficulty detector** — escalation is ~0 where the
+model is competent and rises 17× on out-of-band 3-DOF goals, pricing the extra thought honestly (78→161 kFLOP);
+(2) **the tools bought no additional reach at this scale** — plain K=1 already generalizes to 93–100% *outside its
+training band* (a notable measured fact on its own), so the remaining failures are ones the in-band-trained potential
+cannot rescue either. The ladder's demonstrated value = adaptive compute + honest pricing + determinism through tools;
+rescue-by-tools awaits a regime where K=1 actually fails (EFA-2's harder bodies).
+
 ## Positioning (mid-2026 sweep, adversarially verified — 23 sources, 14 confirmed findings)
 
 **A fresh landscape check overrode the training-weight framing** (the standing rule after the last frontier check). The
