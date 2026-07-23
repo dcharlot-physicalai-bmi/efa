@@ -86,11 +86,34 @@ recomputed after every accepted write and **sample-verified end-to-end**.
    measured costs are different: **5× store size, 5× per-recall compute, unbounded growth, contradictions silently
    averaged in, and no certificate.** Stated as found.
 
+## Stage 4 DONE — the perceptual front-end: pixels → embedding → certified memory → controller (`experiments/ebm_efam4.rs`)
+
+The whole pipeline on rendered observations: scenes (landmark layouts) drawn into 24×24 pixels WITH task-irrelevant
+dynamic clutter (the arm at a random pose per frame) + pixel noise → frozen random-feature embedding (JL projection,
+no training) → the stage-3 certified memory (thresholds **calibrated on held-out scenes**, evaluated on fresh ones)
+→ the shipped efa-1.
+
+| gate | result |
+|---|---|
+| manifold margin (within-scene vs between-scene) | **EXISTS**: 0.395 vs 1.245 median (τ_dup 0.632 < τ_sep 0.766) |
+| recall from fresh observations (new clutter + noise) | **100%** (200 probes) · closed loop pixels→recall→efa-1 **100%** |
+| novel-scene refusal (cue energy) | **AUROC 1.000**, 100% flagged |
+| REAL aliasing wave (one landmark nudged 0.15 rad, contradicting goal) | 17/20 refused with stated reasons; 3 appended past τ_sep — and parent recall stayed **100%** (no silent poisoning; reported as measured) |
+| consolidation under 2× pixel noise | 1-shot 95% → 6-shot **100%** |
+| certificates on the real manifold | separation min 0.81 (synthetic era ~1.2) — tighter, still sound; ε median 0.35 |
+| price · determinism | embed 18.4 + retrieve 16.3 kFLOP · render→embed bit-exact ✓ |
+
+**The stage's central finding (v1 negative → design principle):** a single-frame embedding FAILS outright — the
+moving arm dominates the linear features (within-scene ≈ between-scene distance; **margin ABSENT**; recall 61.5%;
+14/20 aliases silently appended; parents poisoned to 41%). Generic instantaneous features cannot suppress dynamic
+clutter. The training-free fix is structure every robot has: **temporal aggregation** (the scene is static, the
+clutter moves — average 8 frames; arm ~1/K, noise ~1/√K, landmarks persist). One change: 61.5→100% recall,
+0.687→1.000 AUROC, margin restored. Perception for memory is an *invariance* problem before it is a *features*
+problem — measured, not asserted.
+
 ## The staged program from here
-1. ~~Sequence attractors~~ — done. 2. ~~Certified consolidation~~ — **done above.**
-3. **Perceptual front-end**: contexts from real embeddings (start: our own sim observations; then RoboMME's
-   ManiSkill observations).
+1. ~~Sequence attractors~~ 2. ~~Certified consolidation~~ 3. ~~Perceptual front-end~~ — **all done.**
 4. **The public stake**: DAM-as-Modulator on a π0.5-class backbone = the missing 15th variant on RoboMME's
-   leaderboard (CVPR 2026 challenge), + the position paper for CoRL Nov 9.
+   leaderboard (CVPR 2026 challenge, ManiSkill observations + learned encoders), + the position paper for CoRL Nov 9.
 5. **Hidden-property attractors**: basins over latent physical parameters updated by interaction — memory and
    system identification unified in one energy.
