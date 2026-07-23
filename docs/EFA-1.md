@@ -23,6 +23,23 @@ determinism per body (Ferric extends it cross-fabric). Honest scope: reachable-g
 seed; the *architecture identity* is the claim (multi-body-per-weights + energy-verified + deterministic + joules-metered),
 not manipulation breadth — EFA-2 targets a standard external body. Underactuated/cart-pole stays the known open boundary.
 
+### Stage C done — the shipped closed loop is certified (`experiments/ebm_efa1cert.rs`)
+
+Computed **on the released safetensors** (harness validated first: the certifying reconstruction reproduces the card
+100/100/100 before any number was trusted). Findings, now shipped inside `config.json`:
+
+| body | attractor residual (4 goals, max) | ρ(A) at x* | P-metric certified basin | certified ball (P-norm) | empirical from inside |
+|---|---|---|---|---|---|
+| 1-DOF | 0.24 rad | **0.890** | 31.6% of box | r = 0.76 | 100% |
+| 2-DOF | 0.23 rad | **0.952** | 9.8% | r = 0.42 | 100% |
+| 3-DOF | 0.32 rad | **0.956** | 2.6% | r = 0.64 | 100% |
+
+Every (body, goal) loop converges to a **true fixed point** (‖f(x*)−x*‖ ≤ 1e-8) inside the card's 0.35-rad criterion;
+local exponential stability holds at every attractor. The recorded negative that forced the right lens: identity-metric
+one-step contraction fails (24.5/2.6/0.1%) — the loop contracts in the **Lyapunov metric of its own linearization**
+(σmax(P^½JP^-½)<1, AᵀPA−P=−I), the same correction ebm_contract found on the single body. Limits stated: grid-sampled
+(rigorous = interval/CROWN), one goal certified per body, constant P (a state-dependent metric would certify more).
+
 ## Positioning (mid-2026 sweep, adversarially verified — 23 sources, 14 confirmed findings)
 
 **A fresh landscape check overrode the training-weight framing** (the standing rule after the last frontier check). The

@@ -1,6 +1,6 @@
 # EFA-1
 
-**An energy-based, verified, deterministic, multi-body control model** — one body-embedding-conditioned trunk that
+**An energy-based, certified, deterministic, multi-body control model** — one body-embedding-conditioned trunk that
 controls a *family* of bodies from a single weights file. Swap the body embedding, control a different body.
 
 Charlot Lab · Institute for Physical AI @ Bailey Military Institute.
@@ -16,6 +16,7 @@ no meaning; the identity axes are:
 | capability | reach% per body at **K=1 forward pass** (flagship run: 100% on all three bodies) |
 | verification | the model's **own potential** ranks good actions below bad, per body (97–99%) |
 | energy | ~39 kFLOP **per decision** — vs a discrete Gᵈ planner's 7× / 31× / **140×** more as DOF grows |
+| safety | **certified closed loop**: exponential stability at every measured attractor (ρ(A)<1) + a grid-sampled contraction basin per body (Lyapunov P-metric; limits disclosed below) |
 | determinism | same (state, goal) ⇒ same action, **bit-for-bit**; Ferric extends this cross-fabric (Metal ⇄ WebGPU) |
 | generality | **3 bodies per weights file** (1-, 2-, 3-joint coupled chains), one learned embedding row each |
 | footprint | ~39k params ≈ 160 KB — stated as *footprint*, never as capability |
@@ -44,9 +45,16 @@ Inference (from `config.json`): `u = clamp(flow(feat, a=0, t=0, emb[body])[:dof]
 - **Simulated bodies** (coupled-pendulum-chain family, dynamics in `config.json`), reachable-goal sets, distilled from
   per-body fitted-value demonstrators, one gated seed. The claim is the **architecture identity** —
   multi-body-per-weights + energy-verified + deterministic + joules-metered — not manipulation breadth.
-- **Certificates**: the program has demonstrated contraction-region and structural port-Hamiltonian certificates on
-  single-body controllers (ledger §VII); computing them for the EFA-1 closed loop is the named next step — *not claimed
-  for this artifact*.
+- **Certificates — computed on this artifact's closed loop** (exact numbers in `config.json`): every (body, goal) loop
+  converges to a true fixed point (‖f(x*)−x*‖ ≤ 1e-8) within 0.05–0.32 rad of the goal — inside the card's 0.35
+  criterion; **local exponential stability certified** at every attractor (ρ(A) = 0.89 / 0.95 / 0.96 < 1); a
+  grid-sampled contraction basin in the Lyapunov metric of the closed-loop linearization (31.6% / 9.8% / 2.6% of the
+  ±1.2 rad × ±1.5 rad/s box; certified ball r = 0.76 / 0.42 / 0.64 in P-norm; 100% empirical convergence from inside).
+  Limits stated plainly: grid-sampled — not an interval/SMT proof; one representative goal certified per body
+  (attractor residuals measured on all four card goals); identity-metric one-step contraction *fails* here
+  (24.5 / 2.6 / 0.1% — the recorded negative that forced the correct lens). The harness was validated first: the
+  certifying reconstruction reproduces the shipped card 100/100/100 before any number was trusted.
+  Provenance: `experiments/ebm_efa1cert.rs`.
 - Underactuated bodies remain a measured open boundary (ledger). EFA-2 targets a standard external body
   (MuJoCo / SO-101-LeRobot) so comparisons become externally reproducible.
 
