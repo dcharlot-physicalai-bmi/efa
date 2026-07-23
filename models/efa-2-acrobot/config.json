@@ -1,0 +1,11 @@
+{
+  "architecture": "efa-2-acrobot",
+  "description": "EFA-2: the RESCUE artifact — Gym Acrobot-v1 exact spec (underactuated elbow, a in {-1,0,+1}, RK4). Flow K=1 genuinely fails here (bimodal pumping averages out: 54% zero-torque collapse in the hanging region); the energy-gated agency ladder CONVERTS escalation to solving.",
+  "hidden": 96, "params": 20450,
+  "env": {"spec": "Acrobot-v1 (gymnasium classic_control, book dynamics)", "dt": 0.2, "integrator": "rk4", "torque_on": "joint 2 only", "actions": [-1, 0, 1], "omega_max": [12.566, 28.274], "episode_cap": 500, "reward": "-1 per non-terminating step", "terminal": "-cos(th1)-cos(th1+th2) > 1", "start": "all four state vars ~ U(-0.1, 0.1)"},
+  "observation": "[cos(th1), sin(th1), cos(th2), sin(th2), w1/4pi, w2/9pi] — env obs with omega scaled by its spec bound (disclosed)",
+  "inference": "act K: a += flow(obs, a, k/K)/K then round to nearest of {-1,0,1}. AGENCY (the point of this artifact): a1 = K=1; if potential(obs,a1) > tau: a = K=4; if still > tau: a = argmin_a potential(obs,a) over the 3 legal actions.",
+  "identity_card": {"mean_return_K1": -109.9, "solved_K1_pct": 96, "mean_return_agency": -88.0, "solved_agency_pct": 100, "escalation_pct": 5.3, "mean_return_K4_always": -80.9, "teacher_DP": -84.7, "anchor_never_solve": -500.0, "verify_pct": 94.5, "deterministic": true, "tau_95pct": 1.13, "hanging_region_zero_torque_collapse_pct": 54},
+  "honesty": "Distills a model-based DP demonstrator. THE CLAIM: the first EFA body where the energy gate RESCUES — K=1 fails (mode-average collapse, measured), the gated ladder restores 100% solve at ~6% escalation cost, capturing most of always-K=4's gain at a fraction of its compute. One seed.",
+  "gate": "agency return >= -150 && verify >= 90% && bit-exact && reload-exact"
+}

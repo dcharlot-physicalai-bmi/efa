@@ -29,7 +29,7 @@ no meaning; the identity axes are:
 | capability | reach% per body at **K=1 forward pass** (flagship run: 100% on all three bodies) |
 | verification | the model's **own potential** ranks good actions below bad, per body (97–99%) |
 | energy | ~39 kFLOP **per decision** — vs a discrete Gᵈ planner's 7× / 31× / **140×** more as DOF grows |
-| safety | **certified closed loop**: exponential stability at every measured attractor (ρ(A)<1) + a grid-sampled contraction basin per body (Lyapunov P-metric; limits disclosed below) |
+| safety | **certified closed loop**: exponential stability at every measured attractor (ρ(A)<1) + a contraction core (Lyapunov P-metric) + a **funnel basin certificate covering 100% of grid nodes over the full physical domain** per body (limits disclosed below) |
 | agency | **energy-gated tool ladder** (K=1 → K=4 → planner tool → seeded ES, all deterministic): escalates on ≤0.2% of in-distribution decisions, **17× more on out-of-band goals** — the model's own energy detects difficulty and prices the extra compute (78→161 kFLOP/decision) |
 | determinism | same (state, goal) ⇒ same action, **bit-for-bit**; Ferric extends this cross-fabric (Metal ⇄ WebGPU) |
 | generality | **3 bodies per weights file** (1-, 2-, 3-joint coupled chains), one learned embedding row each |
@@ -73,13 +73,17 @@ value is *calibrated difficulty detection and compute pricing*, not rescue; the 
 - **Certificates — computed on this artifact's closed loop** (exact numbers in `config.json`): every (body, goal) loop
   converges to a true fixed point (‖f(x*)−x*‖ ≤ 1e-8) within 0.05–0.32 rad of the goal — inside the card's 0.35
   criterion; **local exponential stability certified** at every attractor (ρ(A) = 0.89 / 0.95 / 0.96 < 1); a
-  grid-sampled contraction basin in the Lyapunov metric of the closed-loop linearization (31.6% / 9.8% / 2.6% of the
-  ±1.2 rad × ±1.5 rad/s box; certified ball r = 0.76 / 0.42 / 0.64 in P-norm; 100% empirical convergence from inside).
-  Limits stated plainly: grid-sampled — not an interval/SMT proof; one representative goal certified per body
-  (attractor residuals measured on all four card goals); identity-metric one-step contraction *fails* here
-  (24.5 / 2.6 / 0.1% — the recorded negative that forced the correct lens). The harness was validated first: the
-  certifying reconstruction reproduces the shipped card 100/100/100 before any number was trusted.
-  Provenance: `experiments/ebm_efa1cert.rs`.
+  contraction core in the Lyapunov metric of the closed-loop linearization (certified ball r = 0.76 / 0.42 / 0.64 in
+  P-norm; 100% empirical convergence from inside). **Basin certificate (funnel composition, LQR-tree-style): 100.0% of
+  grid nodes over the FULL physical domain (θ on the whole circle × ω in the measured transient envelope) provably
+  enter that contraction core** — 1,353 / 74,529 / 456,533 nodes per body, median entry 34 / 62 / 66 steps, zero
+  no-entries, worst sampled funnel expansion σ_P(Φ) = 117.5 / 18.1 / 59.3.
+  Limits stated plainly: grid-sampled and node-local — no claim between nodes (the measure-zero separatrix lies there);
+  not an interval/SMT proof (orbit-tube bounds are the named rigorous route); one representative goal certified per
+  body. The recorded negatives that shaped the method: identity-metric contraction fails (24.5/2.6/0.1%); a full-circle
+  one-step metric field must fail (topological obstruction); cell-granular region-growth stalls when the core is
+  smaller than a grid cell. The harness was validated first: the certifying reconstruction reproduces the shipped card
+  100/100/100 before any number was trusted. Provenance: `experiments/ebm_efa1cert{,2,3,4}.rs`.
 - Underactuated bodies remain a measured open boundary (ledger). EFA-2 targets a standard external body
   (MuJoCo / SO-101-LeRobot) so comparisons become externally reproducible.
 

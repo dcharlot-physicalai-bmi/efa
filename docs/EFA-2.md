@@ -36,6 +36,33 @@ release: [physicalai-bmi/efa-2-pendulum](https://huggingface.co/physicalai-bmi/e
 **Honesty:** distills a model-based DP demonstrator (known dynamics). The claim is *SOTA-level control on the
 published metric at one forward pass, verified + deterministic* — **not** "beats SAC at model-free RL." One seed, 2-D.
 
+## v0.5 SHIPPED — Acrobot-v1: THE RESCUE ARTIFACT (`experiments/ebm_efa2acro.rs`)
+
+**The one agency claim not yet earned, now earned — on an external, underactuated spec.** Gym Acrobot-v1, exact
+published dynamics (torque on the elbow only, a ∈ {−1,0,+1}, RK4, −1/step, cap 500). The body was chosen because K=1
+has a *principled* failure mode here: symmetric-bimodal pumping torque averages toward zero under CFM — and the
+diagnostic confirmed it (**K=1 rounds to zero torque on 54% of hanging-region probes**).
+
+| policy | mean return | solved | extra compute on |
+|---|---|---|---|
+| flow K=1 | −109.9 | 96% | — |
+| **AGENCY (E>τ → K=4 → planner)** | **−88.0** | **100%** | **5.3%** of decisions |
+| flow K=4 always | −80.9 | 100% | 100% of decisions |
+| planner-always (argmin own E) | −84.8 | 100% | every step |
+| DP teacher | −84.7 | 100% | 106 evals/step |
+
+**The model's own energy objects on ~5% of decisions and that objection converts into solved episodes** (+21.9 return,
+96→100% solve; ≈16 pts of the Δ = the four never-solves eliminated, the rest faster solutions) — capturing most of
+always-K=4's gain at a small fraction of its marginal compute. Verify 94.5% (potential ≈ teacher-grade as a 3-action
+selector: planner-always −84.8 vs teacher −84.7); full ladder bit-exact; train-time determinism reproduced the entire
+measurement bit-identically on the release re-run. Gated release (thresholds pre-fixed), reload-exact:
+[physicalai-bmi/efa-2-acrobot](https://huggingface.co/physicalai-bmi/efa-2-acrobot) (20,450 params). One seed; ω obs
+scaled by spec bounds (disclosed); model-based demonstrator (not a model-free-RL comparison).
+
+The agency story across three bodies is now complete and honest: **on bodies where K=1 succeeds, the gate stays
+silent and near-free (≤0.2% escalation); on the body where K=1 genuinely fails, the same gate converts escalation
+into solving.** That is the energy-gated ladder doing exactly what the EFA-1 spec claimed it was for.
+
 ## The ladder from here
 
 - **v1 — MuJoCo body** (Reacher/standard arm task): 3-D+ external dynamics we don't hand-code; demonstrator via the
