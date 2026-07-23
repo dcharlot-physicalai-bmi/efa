@@ -1,3 +1,16 @@
+---
+license: apache-2.0
+library_name: ferric
+pipeline_tag: robotics
+tags:
+- energy-based-model
+- control
+- physical-ai
+- deterministic
+- certified
+- multi-body
+---
+
 # EFA-1
 
 **An energy-based, certified, deterministic, multi-body control model** — one body-embedding-conditioned trunk that
