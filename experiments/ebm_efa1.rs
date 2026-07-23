@@ -11,6 +11,24 @@
 //! Run: `cargo run -p ferric-tensor --example ebm_efa1 --release`
 use ferric_tensor::{Adam, Tensor, Var};
 use std::sync::Arc;
+use std::io::Write as IoWrite;
+const OUTDIR: &str = "/Users/dcharlot/vibe-coding/efa/models/efa-1";
+fn save_st(path: &str, ts: &[(String, Vec<usize>, Vec<f32>)]) -> std::io::Result<()> {
+    let mut hdr = String::from("{"); let mut off = 0usize;
+    for (i, (n, sh, d)) in ts.iter().enumerate() { let b = d.len() * 4; if i > 0 { hdr.push(','); }
+        hdr.push_str(&format!("\"{}\":{{\"dtype\":\"F32\",\"shape\":[{}],\"data_offsets\":[{},{}]}}", n, sh.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","), off, off + b)); off += b; }
+    hdr.push('}'); let mut f = std::fs::File::create(path)?; f.write_all(&(hdr.len() as u64).to_le_bytes())?; f.write_all(hdr.as_bytes())?;
+    for (_, _, d) in ts { for v in d { f.write_all(&v.to_le_bytes())?; } } Ok(())
+}
+fn load_st(path: &str) -> std::io::Result<std::collections::HashMap<String, Vec<f32>>> {
+    let raw = std::fs::read(path)?; let hl = u64::from_le_bytes(raw[0..8].try_into().unwrap()) as usize;
+    let header = std::str::from_utf8(&raw[8..8 + hl]).unwrap().to_string(); let data = &raw[8 + hl..];
+    let mut out = std::collections::HashMap::new(); let mut rest = header.as_str();
+    while let Some(q) = rest.find("\"dtype\"") { let pre = &rest[..q]; let ne = pre.rfind("\":{").unwrap(); let ns = pre[..ne].rfind('"').unwrap() + 1;
+        let name = pre[ns..ne].to_string(); let a = &rest[q..]; let os = a.find("\"data_offsets\":[").unwrap() + 16; let oe = a[os..].find(']').unwrap() + os;
+        let of: Vec<usize> = a[os..oe].split(',').map(|s| s.trim().parse().unwrap()).collect();
+        out.insert(name, data[of[0]..of[1]].chunks_exact(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())).collect()); rest = &a[oe..]; } Ok(out)
+}
 const H: usize = 128; const HV: usize = 128; const EMB: usize = 6; const DT: f32 = 0.05; const GAMMA: f32 = 0.97; const UMAX: f32 = 4.0; const CPL: f32 = 0.5;
 const G5: [f32; 5] = [-4.0, -2.0, 0.0, 2.0, 4.0];
 const NB: usize = 3;                       // bodies: 1-, 2-, 3-joint chains
@@ -77,6 +95,34 @@ impl Efa1 {
         let mut h1 = [0.0f32; H]; for j in 0..H { let mut z = self.pb1[j]; for c in 0..f.len() { z += f[c] * self.pw[c][j]; } h1[j] = z.max(0.0); }
         let mut h2 = [0.0f32; H]; for j in 0..H { let mut z = self.pb2[j]; for k in 0..H { z += h1[k] * self.pw2[k * H + j]; } h2[j] = z.max(0.0); }
         let mut o = self.pb3; for j in 0..H { o += h2[j] * self.pw3[j]; } o }
+}
+
+// identity card per body: (reach%, verify%, determinism)
+fn eval_card(m: &Efa1, vns: &[Vn]) -> Vec<(f32, f32, bool)> {
+    let gt = [[0.8f32, -0.6, 0.5], [-0.7, 0.5, -0.6], [0.5, 0.9, -0.4], [-0.5, -0.8, 0.7]];
+    let mut rows = vec![];
+    for bi in 0..NB { let nj = NJ[bi];
+        let (mut reach, nn) = (0, 60);
+        for k in 0..nn { let sd = 900 + (bi * 100 + k) as u32; let mut s = [0.0f32; 6]; let mut g = [0.0f32; 3];
+            let gtk = gt[k % 4]; for j in 0..nj { s[j] = (u(sd, 7 + j as u32) * 2.0 - 1.0) * PI; g[j] = gtk[j]; }
+            for _ in 0..300 { let a = m.act(bi, s, g); s = step(nj, s, a); }
+            if (0..nj).all(|i| wrap(s[i] - g[i]).abs() < 0.35 && s[3 + i].abs() < 0.7) { reach += 1; } }
+        let (mut vg, mut vt) = (0, 0); for k in 0..2000u32 { let mut s = [0.0f32; 6]; let mut g = [0.0f32; 3];
+            for j in 0..nj { let ju = j as u32; s[j] = (u(k, 41 + ju) * 2.0 - 1.0) * PI; s[3 + j] = (u(k, 44 + ju) * 2.0 - 1.0) * 3.0; g[j] = (u(k, 47 + ju) * 2.0 - 1.0) * 1.0; }
+            let us = vns[bi].ustar(s, g); let mut bad = [0.0f32; 3]; for j in 0..nj { bad[j] = (u(k, 50 + j as u32) * 2.0 - 1.0) * UMAX; }
+            vt += 1; if m.energy(bi, s, g, us) < m.energy(bi, s, g, bad) { vg += 1; } }
+        let s0 = [0.3f32, -0.2, 0.1, 0.0, 0.0, 0.0]; let g0 = [0.5f32, -0.3, 0.2];
+        let (a1, a2) = (m.act(bi, s0, g0), m.act(bi, s0, g0));
+        let det = a1.iter().zip(a2.iter()).all(|(x, y)| x.to_bits() == y.to_bits());
+        rows.push((reach as f32 / nn as f32 * 100.0, vg as f32 / vt as f32 * 100.0, det)); }
+    rows
+}
+fn print_card(rows: &[(f32, f32, bool)], fin: usize, tag: &str) {
+    let flopf = 2 * (fin * H + H * H + H * 3); let flopv = 2 * (12 * HV + HV * HV + HV);
+    println!("\n  ── EFA-1 IDENTITY CARD [{}] (one weights file, {} bodies) ──", tag, NB);
+    println!("     body      reach(flow K=1)   verify    FLOPs/decision   vs discrete Gᵈ   determinism");
+    for bi in 0..NB { let nj = NJ[bi]; let (r, v, det) = rows[bi]; let gd = 5usize.pow(nj as u32) + 3usize.pow(nj as u32);
+        println!("     {}-DOF       {:>4.0}%           {:>4.1}%     {:>7}          {:>4}×          {}", nj, r, v, flopf, (gd * flopv) / flopf, if det { "bit-exact ✓" } else { "✗" }); }
 }
 
 fn main() { pollster::block_on(run()); }
@@ -181,33 +227,34 @@ async fn run() {
         fw, fb1: fp[fin].to_vec().await, fw2: fp[fin + 1].to_vec().await, fb2: fp[fin + 2].to_vec().await, fw3: fp[fin + 3].to_vec().await, fb3: [fb3[0], fb3[1], fb3[2]],
         pw, pb1: pp[pin].to_vec().await, pw2: pp[pin + 1].to_vec().await, pb2: pp[pin + 2].to_vec().await, pw3: pp[pin + 3].to_vec().await, pb3: pp[pin + 4].to_vec().await[0] };
 
-    // ---- IDENTITY CARD ----
-    println!("\n  ── EFA-1 IDENTITY CARD (one weights file, {} bodies) ──", NB);
-    println!("     body      reach(flow K=1)   verify    FLOPs/decision   vs discrete Gᵈ   determinism");
-    let flopf = 2 * (fin * H + H * H + H * 3); let flopv = 2 * (12 * HV + HV * HV + HV);
-    for bi in 0..NB { let nj = NJ[bi];
-        let (mut reach, nn) = (0, 60);
-        for k in 0..nn { let sd = 900 + (bi * 100 + k) as u32; let mut s = [0.0f32; 6]; let mut g = [0.0f32; 3];
-            for j in 0..nj { s[j] = (u(sd, 7 + j as u32) * 2.0 - 1.0) * PI; g[j] = [(0.8f32, -0.6, 0.5), (-0.7, 0.5, -0.6), (0.5, 0.9, -0.4), (-0.5, -0.8, 0.7)][k % 4].0; }
-            // per-body test goals (reachable set); reuse a small goal table
-            let gt = [[0.8f32, -0.6, 0.5], [-0.7, 0.5, -0.6], [0.5, 0.9, -0.4], [-0.5, -0.8, 0.7]][k % 4]; for j in 0..nj { g[j] = gt[j]; }
-            for _ in 0..300 { let a = m.act(bi, s, g); s = step(nj, s, a); }
-            let ok = (0..nj).all(|i| wrap(s[i] - g[i]).abs() < 0.35 && s[3 + i].abs() < 0.7); if ok { reach += 1; } }
-        // verify: potential ranks u* below random over random states
-        let (mut vg, mut vt) = (0, 0); for k in 0..2000u32 { let mut s = [0.0f32; 6]; let mut g = [0.0f32; 3];
-            for j in 0..nj { let ju = j as u32; s[j] = (u(k, 41 + ju) * 2.0 - 1.0) * PI; s[3 + j] = (u(k, 44 + ju) * 2.0 - 1.0) * 3.0; g[j] = (u(k, 47 + ju) * 2.0 - 1.0) * 1.0; }
-            let us = vns[bi].ustar(s, g); let mut bad = [0.0f32; 3]; for j in 0..nj { bad[j] = (u(k, 50 + j as u32) * 2.0 - 1.0) * UMAX; }
-            vt += 1; if m.energy(bi, s, g, us) < m.energy(bi, s, g, bad) { vg += 1; } }
-        // determinism: same (state,goal) twice → identical action bytes
-        let s0 = [0.3f32, -0.2, 0.1, 0.0, 0.0, 0.0]; let g0 = [0.5f32, -0.3, 0.2];
-        let a1 = m.act(bi, s0, g0); let a2 = m.act(bi, s0, g0);
-        let det = a1.iter().zip(a2.iter()).all(|(x, y)| x.to_bits() == y.to_bits());
-        let gd = 5usize.pow(nj as u32) + 3usize.pow(nj as u32);
-        println!("     {}-DOF       {:>4.0}%           {:>4.1}%     {:>7}          {:>4}×          {}",
-            nj, reach as f32 / nn as f32 * 100.0, vg as f32 / vt as f32 * 100.0, flopf, (gd * flopv) / flopf, if det { "bit-exact ✓" } else { "✗" }); }
+    // ---- IDENTITY CARD → GATE → SAVE → RELOAD → round-trip ----
+    let rows = eval_card(&m, &vns); print_card(&rows, fin, "trained");
     let nparams = (fin * H + H + H * H + H + H * 3 + 3) + (pin * H + H + H * H + H + H + 1) + NB * EMB;
-    println!("\n  ONE trunk, {} params, {} bodies — swap the body embedding, control a different body. Flow = 1 forward pass;", nparams, NB);
-    println!("  the discrete planner pays Gᵈ value-evals (5ⁿ+3ⁿ). Verify = the model's own potential scoring actions.");
-    println!("  Determinism: same (state,goal) ⇒ same action bit-for-bit (Ferric extends this cross-fabric Metal⇄WebGPU).");
+    let pass = rows.iter().all(|(r, v, det)| *r >= 95.0 && *v >= 90.0 && *det);
+    if !pass { println!("\n  GATE FAILED (need every body reach≥95 & verify≥90 & bit-exact) — not shipping."); return; }
+    // save shared trunk + body embedding
+    std::fs::create_dir_all(OUTDIR).unwrap();
+    let mut ts: Vec<(String, Vec<usize>, Vec<f32>)> = vec![("body_embedding".into(), vec![NB, EMB], m.emb.clone())];
+    for c in 0..fin { ts.push((format!("flow.in{}", c), vec![1, H], m.fw[c].clone())); }
+    ts.push(("flow.b1".into(), vec![H], m.fb1.clone())); ts.push(("flow.w2".into(), vec![H, H], m.fw2.clone()));
+    ts.push(("flow.b2".into(), vec![H], m.fb2.clone())); ts.push(("flow.w3".into(), vec![H, 3], m.fw3.clone())); ts.push(("flow.b3".into(), vec![3], m.fb3.to_vec()));
+    for c in 0..pin { ts.push((format!("potential.in{}", c), vec![1, H], m.pw[c].clone())); }
+    ts.push(("potential.b1".into(), vec![H], m.pb1.clone())); ts.push(("potential.w2".into(), vec![H, H], m.pw2.clone()));
+    ts.push(("potential.b2".into(), vec![H], m.pb2.clone())); ts.push(("potential.w3".into(), vec![H, 1], m.pw3.clone())); ts.push(("potential.b3".into(), vec![1], vec![m.pb3]));
+    save_st(&format!("{OUTDIR}/model.safetensors"), &ts).unwrap();
+    let bodies: Vec<String> = (0..NB).map(|b| format!("\"{}-DOF-chain\"", NJ[b])).collect();
+    let cardj: Vec<String> = (0..NB).map(|b| format!("{{\"body\":\"{}-DOF\",\"reach_K1\":{:.1},\"verify\":{:.1},\"deterministic\":{}}}", NJ[b], rows[b].0, rows[b].1, rows[b].2)).collect();
+    let config = format!("{{\n  \"architecture\": \"efa-1\",\n  \"description\": \"EFA-1: one body-embedding-conditioned trunk controls a family of bodies. Flow head (actuation, K=1 forward pass) + potential head (verify: low = valid action). Energy-based, deterministic, joules-metered, multi-body — identity NOT measured in tokens or parameter count.\",\n  \"hidden\": {H}, \"emb_dim\": {EMB}, \"bodies\": [{}],\n  \"params\": {nparams},\n  \"flow_features\": \"[12 joint-feats (4/joint: cos(θ-g),sin(θ-g),ω,sinθ), a1,a2,a3, t, {EMB}-dim body-embedding]\",\n  \"potential_features\": \"[12 joint-feats, a1,a2,a3, {EMB}-dim body-embedding]\",\n  \"env\": {{\"family\":\"coupled-pendulum-chain\",\"dof\":[1,2,3],\"dt\":{DT},\"umax\":{UMAX},\"coupling\":{CPL},\"damping\":0.05,\"gravity\":\"sin\"}},\n  \"inference\": \"act(body,state,goal): v = flow(feat, a=0, t=0, emb[body]); u = clamp(v[:dof]). verify(body,state,goal,a): potential(feat,a,emb[body]) — lower is more valid.\",\n  \"identity_card\": [{}],\n  \"gate\": \"every body reach_K1>=95 && verify>=90 && bit-exact determinism\"\n}}\n", bodies.join(", "), cardj.join(", "));
+    std::fs::write(format!("{OUTDIR}/config.json"), config).unwrap();
+    // reload + re-card
+    let t = load_st(&format!("{OUTDIR}/model.safetensors")).unwrap();
+    let g = |n: &str| t.get(n).unwrap().clone();
+    let fb3 = g("flow.b3"); let m2 = Efa1 { emb: g("body_embedding"),
+        fw: (0..fin).map(|c| g(&format!("flow.in{}", c))).collect(), fb1: g("flow.b1"), fw2: g("flow.w2"), fb2: g("flow.b2"), fw3: g("flow.w3"), fb3: [fb3[0], fb3[1], fb3[2]],
+        pw: (0..pin).map(|c| g(&format!("potential.in{}", c))).collect(), pb1: g("potential.b1"), pw2: g("potential.w2"), pb2: g("potential.b2"), pw3: g("potential.w3"), pb3: g("potential.b3")[0] };
+    let rows2 = eval_card(&m2, &vns); print_card(&rows2, fin, "RELOADED from disk");
+    let rt = rows.iter().zip(&rows2).all(|(a, b)| (a.0 - b.0).abs() < 0.5 && (a.1 - b.1).abs() < 0.5);
+    println!("\n  ONE trunk, {} params, {} bodies — swap the body embedding, control a different body. Flow = 1 forward pass.", nparams, NB);
+    println!("  GATE PASSED · round-trip {} · RELEASED: {OUTDIR}/model.safetensors ({} tensors) + config.json", if rt { "EXACT ✓" } else { "MISMATCH ✗" }, ts.len());
     println!("  Identity measured in reach/body · FLOPs/decision · verify% · determinism — NOT tokens, NOT parameter count.");
 }

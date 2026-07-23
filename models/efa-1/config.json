@@ -1,0 +1,12 @@
+{
+  "architecture": "efa-1",
+  "description": "EFA-1: one body-embedding-conditioned trunk controls a family of bodies. Flow head (actuation, K=1 forward pass) + potential head (verify: low = valid action). Energy-based, deterministic, joules-metered, multi-body — identity NOT measured in tokens or parameter count.",
+  "hidden": 128, "emb_dim": 6, "bodies": ["1-DOF-chain", "2-DOF-chain", "3-DOF-chain"],
+  "params": 39318,
+  "flow_features": "[12 joint-feats (4/joint: cos(θ-g),sin(θ-g),ω,sinθ), a1,a2,a3, t, 6-dim body-embedding]",
+  "potential_features": "[12 joint-feats, a1,a2,a3, 6-dim body-embedding]",
+  "env": {"family":"coupled-pendulum-chain","dof":[1,2,3],"dt":0.05,"umax":4,"coupling":0.5,"damping":0.05,"gravity":"sin"},
+  "inference": "act(body,state,goal): v = flow(feat, a=0, t=0, emb[body]); u = clamp(v[:dof]). verify(body,state,goal,a): potential(feat,a,emb[body]) — lower is more valid.",
+  "identity_card": [{"body":"1-DOF","reach_K1":100.0,"verify":97.4,"deterministic":true}, {"body":"2-DOF","reach_K1":100.0,"verify":98.0,"deterministic":true}, {"body":"3-DOF","reach_K1":100.0,"verify":99.3,"deterministic":true}],
+  "gate": "every body reach_K1>=95 && verify>=90 && bit-exact determinism"
+}
