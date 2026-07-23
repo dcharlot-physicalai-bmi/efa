@@ -5,6 +5,24 @@ post-transformer model for Physical AI — the class of artifact a Liquid-AI-ilk
 identity. Positioning is being verified against a live mid-2026 sweep (Liquid, Poolside, Logical Intelligence,
 Adaptive, genetic/deterministic AI); this spec states what we build and how it is measured._
 
+## v1 result — the multi-body trunk works (`experiments/ebm_efa1.rs`)
+
+**One 39,318-param trunk + one body-embedding table controls three morphologies (1-, 2-, 3-joint chains) — swap the
+embedding, control a different body.** Stage A: 3 per-body FVI demonstrators. Stage B: one shared flow net + one shared
+potential net + a learned body embedding, distilled from a mixed-body stream (masked action dims). Identity card:
+
+| body | reach (flow, K=1) | verify | FLOPs/decision | vs discrete Gᵈ | determinism |
+|---|---|---|---|---|---|
+| 1-DOF | **100%** | 97.4% | 39,168 | 7× | bit-exact ✓ |
+| 2-DOF | **100%** | 98.0% | 39,168 | 31× | bit-exact ✓ |
+| 3-DOF | **100%** | 99.3% | 39,168 | **140×** | bit-exact ✓ |
+
+100% reach on all three at a single forward pass; the shared potential verifies per-body (99%+); the FLOP-per-decision
+edge over the discrete planner **grows with DOF** (7→31→140×) — perf-per-joule compounding on a multi-body model. Bit-exact
+determinism per body (Ferric extends it cross-fabric). Honest scope: reachable-goal sets, our simulated chain family, one
+seed; the *architecture identity* is the claim (multi-body-per-weights + energy-verified + deterministic + joules-metered),
+not manipulation breadth — EFA-2 targets a standard external body. Underactuated/cart-pole stays the known open boundary.
+
 ## Positioning (mid-2026 sweep, adversarially verified — 23 sources, 14 confirmed findings)
 
 **A fresh landscape check overrode the training-weight framing** (the standing rule after the last frontier check). The
