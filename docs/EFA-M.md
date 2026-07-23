@@ -61,10 +61,33 @@ the harness counted band fly-throughs as visits. **The certificate supplied the 
 the certified residual bound is now operationally load-bearing, not just a claim on a card. (Recorded negative:
 first-run event criterion untestably tight; same class as the cert1 harness bug.)
 
+## Stage 3 DONE — certified consolidation: every write audited, refusals with stated reasons (`experiments/ebm_efam3.rs`)
+
+The answer to RoboTTT-style unverified test-time writes: a **write gate** judged in context space (novel → append;
+same-context + agreeing goal → consolidate by running average; same-context + contradicting goal → **refuse as
+contradiction**; conflict-zone proximity to a *different* memory → **refuse as aliasing risk**), plus a per-pattern
+**retrieval certificate** — separation dᵢ ⇒ certified basin ρᵢ = dᵢ/4 and error bound εᵢ = (M−1)·e^(−β dᵢ²/4)·D —
+recomputed after every accepted write and **sample-verified end-to-end**.
+
+| gate | result (600-event stream: 100 novel · 403 noisy repeats · 97 engineered conflicts) |
+|---|---|
+| write-gate verdicts | 100/100 novels appended · 399/403 repeats consolidated · **97/97 conflicts refused** · false-refusal 0.8% |
+| gated recall (all legitimate memories, 25% & 50% cue corruption) | **100%** |
+| certificate honesty | **0/800 sampled violations** (bound sound; conservative — worst err/ε ≈ 0) |
+| consolidation gain (goal noise σ=0.15) | error **0.079 → 0.034 rad** (noise averages out, as it should) |
+| closed loop via shipped efa-1, post-stream store | **100%** · bit-exact · write audit ~8 kFLOP |
+
+**Two findings recorded exactly as measured:**
+1. *(v1 negative that defines the gate)* Auditing writes in FULL pattern space misclassifies "same context,
+   different goal" conflicts as novel — the goal coordinates make them look far — so they get appended and poison
+   recall (65% on protected memories). **The audit must live in context space, where cues actually arrive.**
+2. *(a prediction that did not survive measurement)* The expected interference damage to the naive append-all
+   store did **not** materialize at this scale — redundant repeat clouds defend its recall. The TTT-analog's real
+   measured costs are different: **5× store size, 5× per-recall compute, unbounded growth, contradictions silently
+   averaged in, and no certificate.** Stated as found.
+
 ## The staged program from here
-1. ~~Sequence attractors~~ — **done above.**
-2. **Certified consolidation**: Hebbian fast-weight writes with a Lyapunov-style convergence guarantee — what
-   RoboTTT's TTT does, but verified (our certificate machinery pointed at the memory write).
+1. ~~Sequence attractors~~ — done. 2. ~~Certified consolidation~~ — **done above.**
 3. **Perceptual front-end**: contexts from real embeddings (start: our own sim observations; then RoboMME's
    ManiSkill observations).
 4. **The public stake**: DAM-as-Modulator on a π0.5-class backbone = the missing 15th variant on RoboMME's
