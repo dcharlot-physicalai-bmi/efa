@@ -107,8 +107,31 @@ analytic cases:** restitution (rebound peak = e²·h to ~1%, e∈{0,0.5,1}); Cou
 above → a=(F−μN)/m — both sides of the threshold exact); elastic 1-D collision (momentum & KE conserved to 1e-15);
 resting stability (penetration <2e-4, zero drift over 10 s). The recorded bug that shaped it: a Baumgarte velocity
 bias injects energy on repeated elastic bounces (e=1 rebounded to 6.2×h) — restitution must be **velocity-only**,
-penetration handled by position projection. Next: couple the arm end-effector as the pusher → a PushCube-class task on
-the combined verified articulation + contact stack, driven by the EFA flow controller.
+penetration handled by position projection.
+
+## First CONTACT task on the port — PUSHCUBE (`experiments/efa2_pushcube.rs`)
+
+A controllable pusher pushes an object (disc puck — a disc under frictionless-normal contact translates *exactly*, no
+rotational approximation) across a table to a target, against Coulomb table friction, on the verified contact solver.
+PushT/PushCube class (the de-facto contact smoke-test). Scripted get-behind-and-push demonstrator at **100%**; the EFA
+flow distilled from it (obs → pusher velocity, CFM loss 0.0001 — an essentially perfect fit).
+
+| K | reach (puck < 0.10 of target) | mean final distance |
+|---|---|---|
+| K=1 | 79% | 0.087 |
+| K=2 | **92%** | 0.051 |
+| K=4 | **96%** | 0.048 |
+| demonstrator | 100% | 0.038 |
+| random push | 3% | 0.792 |
+
+**The EFA flow recipe transfers to a CONTACT manipulation task on our own SAPIEN-core port** — 96% at K=4, the K-dial
+clearing 90% by K=2, bit-exact. The contrast with Reacher is itself the finding: PushCube's smooth pusher-velocity
+demonstrator distills cleanly (loss 1e-4 → 96%) where Reacher's IK-elbow-discontinuous torque demonstrator does not
+(loss 5e-2 → 90% only at K=8) — *distillability is set by the smoothness of the demonstrator, not the task's contact
+complexity.* Honest scope: disc puck (oriented-box contact + rotation is next); kinematic pusher (position-controlled
+end-effector model); distills a scripted demonstrator; one seed. Next: couple the arm end-effector as the pusher →
+PushCube on the combined articulation + contact stack; then oriented-box contact + rotation; then match a specific
+published ManiSkill spec for a directly-comparable number.
 
 ## Reacher — the honest read
 
@@ -117,9 +140,17 @@ approaching the demonstrator; determinism bit-exact. The **K=1≥90% gate was no
 gap at small torques (near the target the required torque is small and the flow's residual dominates) is what the
 extra integration steps close. Two findings recorded: (1) a **hard-clamped** PD is un-distillable (near-discontinuous
 at the saturation boundary — 55% reach); **tanh soft-saturation** is (distillable, 90% at K=8); (2) the K=1 gate wants
-the **hybrid flow+correction** (`v = −κ∇ₐE + w`, ledger-proven 100% on 2-DOF) — the named next build, not chased with
-blind capacity. Scope: disclosed params (not a byte-match to MuJoCo Reacher's inertias — the contact-free articulated
-task is faithfully the same class); distills a PD demonstrator; one seed.
+the **hybrid flow+correction** (`v = −κ∇ₐE + w`, ledger-proven 100% on 2-DOF). Scope: disclosed params (not a
+byte-match to MuJoCo Reacher's inertias — the contact-free articulated task is faithfully the same class); distills a
+PD demonstrator; one seed.
+
+**The hybrid was tried and is a recorded NEGATIVE** (`experiments/efa2_reacher_hyb.rs`): on Reacher it *underperformed*
+the plain flow — K=1 37% (vs 63%), K=4 60% (vs 88%) — the 2nd-order-autograd training loss actually *rose* (0.17→0.23)
+and the potential carried only 32% of the velocity. The technique that took the smooth 2-DOF swing-up to 100% does
+**not** transfer to Reacher, because Reacher's u* is an IK-based, elbow-*discontinuous* function — a fundamentally
+harder fit than a smooth pendulum bowl. Honest lesson: not every ledger-proven method generalizes; the plain flow's
+K-dial (90% @ K=8) stands as the Reacher result, and K=1≥90% would need on-policy DAgger or a continuous-IK
+demonstrator, not the hybrid.
 
 ## The ladder from here
 

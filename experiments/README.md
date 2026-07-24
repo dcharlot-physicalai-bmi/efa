@@ -57,6 +57,7 @@ Each file's header comment states its purpose, method, and the paper/lineage it 
 | file | what it demonstrates |
 |---|---|
 | `ebm_expertise.rs` | **intelligence = economy of effort** — as the descent EBT learns, the descent steps to solve *fall* (K*: 8→4; K=4 accuracy 11→100%). Expertise recodes the landscape so the hard problem becomes cheap — fewer watts for the same capability |
+| `ebm_curiosity.rs` | **curiosity ↔ expertise — two halves of one arc, one scalar** — bridges OIST's curiosity-driven free-energy robot (Tinker–Doya–Tani, *Science Advances* 2026) to the economy-of-effort result. Curiosity = train on the highest-**surprise** (post-descent residual) contexts, a sibling of OIST's KL info-gain reward. **Economy half — ROBUST:** surprise falls 1.38→0.12 and K*→4 as skill forms — the same scalar curiosity acts on is what mastery drives down. **Speed half — HONEST NEGATIVE here:** on the diffuse multivalued task curious ≈ control (both hit 85% at step 300); a companion localized-region bench (PAI-101 *Curiosity* lesson) shows curiosity ~halves steps (2.25×). The speed win scales with how concentrated the informative experience is — it is task-dependent, not universal |
 | `ebm_materiality.rs` | **materiality does computation** — disc-packing: abstract random search collapses (59%→0% valid as density rises) while descent on a repulsion energy solves 100% in a few steps. Physics drops the search clauses |
 
 ## The flagship — one structured energy, four jobs, on a body (the empty center of the triangle)
