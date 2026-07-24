@@ -63,6 +63,27 @@ The agency story across three bodies is now complete and honest: **on bodies whe
 silent and near-free (≤0.2% escalation); on the body where K=1 genuinely fails, the same gate converts escalation
 into solving.** That is the energy-gated ladder doing exactly what the EFA-1 spec claimed it was for.
 
+## SAPIEN → Rust: the articulated-dynamics core, VERIFIED (`experiments/sim_planar.rs`)
+
+The directive: don't touch Python — port the simulator to Rust. Full SAPIEN is PhysX rigid-body + contact solver +
+collision meshes + GPU; its **control-relevant heart** is the articulated forward-dynamics solver, and that is ported
+and verified first so every ManiSkill number afterward stands on physics we can prove correct. A general planar
+n-link revolute engine with exact Lagrangian dynamics — `M(q)q̈ + C(q,q̇)q̇ + g(q) = τ`, `M` from COM Jacobians,
+Christoffel Coriolis from ∂M/∂q, Gaussian-elimination solve, RK4.
+
+**Verification (rigorous, convention-independent):**
+- single link reproduces the analytic θ̈ = −sinθ to **machine precision** (0 error in f64);
+- τ=0 energy drift falls **~15× per dt-halving** = RK4's 4th order — which *proves* M, C, g are mutually exact
+  (a wrong Coriolis leaks energy at O(1); the 4th-order decay is only possible if the model is right);
+- work-energy: ∫τ·q̇ dt = ΔE to 3.6e-4.
+- Honest precision note: f32 (the deployment precision) leaves a ~1e-3 energy floor from finite-difference-Coriolis
+  roundoff — diagnosed by the dt-sweep (it plateaus in f32, converges in f64); analytic Coriolis removes it.
+
+**Named next layers (not built here):** contact/friction impulse solver + collision geometry → then a ManiSkill-class
+task (Reacher-style needs no contacts; PushCube-style needs the impulse solver) instantiated on this core, driven by
+the EFA flow controller, reported on the world's published metric — the same discipline as Pendulum-v1 / Acrobot-v1,
+now on our own verified Rust substrate.
+
 ## The ladder from here
 
 - **v1 — MuJoCo body** (Reacher/standard arm task): 3-D+ external dynamics we don't hand-code; demonstrator via the
