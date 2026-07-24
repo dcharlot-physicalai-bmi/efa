@@ -138,8 +138,36 @@ confident, interaction pays where it isn't.** Remember / verify / adapt / *price
 now including the object's physics. Honest scope: 1-DOF sensor offset as the single parameter (mass/friction/
 multi-param = the extension); stage-4 perceptual stand-in; one seed.
 
-## The staged program from here — mechanism program COMPLETE (stages 1–5)
+## Stage 6 CAPSTONE — the lifelong agent: five stages in one loop that improves over its own life (`experiments/ebm_efam6.rs`)
+
+RoboMME's authors named this the long-term goal: "enable in-context learning for robots — learn from its own
+experience, shape its behavior online." One integrated agent: **perceive (stage 4) → recognize via cue energy
+(stage 1) → if novel, probe + identify the hidden property (stage 5) and write through the certified gate (stage 3);
+if known, recall for free → correct the shipped efa-1 and act.** 200 episodes, 15 recurring objects, Zipf
+re-encounter. (The sequence-attractor stage 2 is a proven-separate composable capability, not re-run here.)
+
+| finding | result |
+|---|---|
+| **self-improvement curve** | interaction-steps/episode falls **41→29 (verify-always, 100% success)** or **37→0 (trust-familiar, 78%)** as memory fills |
+| the familiarity frontier | memory buys a **1.2× (reliable) to 3.3× (cheapest)** interaction-cost cut — speed↔accuracy, measured, not asserted |
+| bounded store | **15 distinct identities** vs naive-append's 200 |
+| **forgetting = interaction debt** | after 50 one-shot distractors, both recover to 100% via re-probing, but EFA-M *remembers* (1680 re-probe steps) while the fixed-capacity overwrite memory *forgot* and must re-earn every original (**2440, 1.5× more**) |
+| integrated single episode | perceive→recognize(E=0.099<τ)→recall δ̂=+0.405 (true +0.429, 0 probes)→correct→reach ✓ · bit-exact |
+
+**Two honest findings the capstone surfaces:** (1) blind recall precision degrades as the store grows (associative
+crosstalk: 70% at store=60) — and **the energy-verify gate is exactly what catches it** (100% when the certificate
+guards retrieval), tying the whole thesis together: the energy tells you when to trust memory. (2) The
+retrieval-interference limit is set by β / embedding dimension / *encoder capacity* — the correlated perceptual
+embeddings lower effective capacity below stage 1's synthetic M=500 result; near-aliased identities are the
+learned-encoder's job (the public-stake step), not the memory mechanism's. Honest scope: perceptually-separable
+world (reject-sampled, disclosed); 1-DOF body + sensor-offset property; one seed.
+
+The capstone is the thesis as one system: **an agent that gets cheaper as it lives, stays correct when it verifies,
+and turns forgetting into a measured interaction debt it mostly avoids — all from one energy, on the shipped model.**
+
+## The staged program from here — MECHANISM PROGRAM COMPLETE (stages 1–6)
 1. ~~Recall + certificate~~ 2. ~~Sequences~~ 3. ~~Certified consolidation~~ 4. ~~Perceptual front-end~~
-5. ~~Hidden-property attractors~~ — **all done, all measured on the shipped artifact.**
+5. ~~Hidden-property attractors~~ 6. ~~Lifelong integration~~ — **all done, all measured on the shipped artifact.**
 - **The public stake** (next): DAM-as-Modulator on a π0.5-class backbone = the missing 15th variant on RoboMME's
-  leaderboard (CVPR 2026 challenge, ManiSkill observations + learned encoders), + the position paper for CoRL Nov 9.
+  leaderboard (CVPR 2026 challenge, ManiSkill observations + learned encoders — which also lifts the retrieval-capacity
+  limit the capstone measured), + the position paper for CoRL Nov 9.
