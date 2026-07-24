@@ -84,6 +84,29 @@ task (Reacher-style needs no contacts; PushCube-style needs the impulse solver) 
 the EFA flow controller, reported on the world's published metric — the same discipline as Pendulum-v1 / Acrobot-v1,
 now on our own verified Rust substrate.
 
+## First task on the port — REACHER (`experiments/efa2_reacher.rs`)
+
+A 2-link planar arm reaching a random target on the verified engine (g=0, no contacts — the Reacher-v4 class). Exact
+IK (0.0 fingertip residual), a tanh-soft-saturated PD demonstrator at **98%**, and the EFA flow controller distilled
+from it by conditional flow matching.
+
+| K (forward passes/decision) | reach (fingertip < 0.12) | mean final distance |
+|---|---|---|
+| K=1 | 63% | 0.113 |
+| K=2 | 84% | 0.078 |
+| K=4 | 88% | 0.073 |
+| K=8 | **90%** | 0.073 |
+| tanh-PD demonstrator | 98% | 0.009 |
+
+**The honest read:** the thinking-dial is real on an articulated manipulation task — reach climbs 63→90% as K grows,
+approaching the demonstrator; determinism bit-exact. The **K=1≥90% gate was not met (63%)** — the endpoint-precision
+gap at small torques (near the target the required torque is small and the flow's residual dominates) is what the
+extra integration steps close. Two findings recorded: (1) a **hard-clamped** PD is un-distillable (near-discontinuous
+at the saturation boundary — 55% reach); **tanh soft-saturation** is (distillable, 90% at K=8); (2) the K=1 gate wants
+the **hybrid flow+correction** (`v = −κ∇ₐE + w`, ledger-proven 100% on 2-DOF) — the named next build, not chased with
+blind capacity. Scope: disclosed params (not a byte-match to MuJoCo Reacher's inertias — the contact-free articulated
+task is faithfully the same class); distills a PD demonstrator; one seed.
+
 ## The ladder from here
 
 - **v1 — MuJoCo body** (Reacher/standard arm task): 3-D+ external dynamics we don't hand-code; demonstrator via the
