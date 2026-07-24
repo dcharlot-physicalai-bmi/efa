@@ -98,7 +98,21 @@ from it by conditional flow matching.
 | K=8 | **90%** | 0.073 |
 | tanh-PD demonstrator | 98% | 0.009 |
 
-**The honest read:** the thinking-dial is real on an articulated manipulation task — reach climbs 63→90% as K grows,
+## SAPIEN → Rust step 2 — the CONTACT/FRICTION layer, VERIFIED (`experiments/sim_contact.rs`)
+
+The next piece after the articulation core: a 2D rigid-body world with an impulse-based contact solver (the class
+PhysX/Box2D use) + Coulomb friction, so the manipulation tasks that NEED contact (PushCube-class — the majority of
+ManiSkill) can run on our own Rust substrate. Sequential-impulse LCP with a friction cone; **verified against four
+analytic cases:** restitution (rebound peak = e²·h to ~1%, e∈{0,0.5,1}); Coulomb friction (below μN → no slide;
+above → a=(F−μN)/m — both sides of the threshold exact); elastic 1-D collision (momentum & KE conserved to 1e-15);
+resting stability (penetration <2e-4, zero drift over 10 s). The recorded bug that shaped it: a Baumgarte velocity
+bias injects energy on repeated elastic bounces (e=1 rebounded to 6.2×h) — restitution must be **velocity-only**,
+penetration handled by position projection. Next: couple the arm end-effector as the pusher → a PushCube-class task on
+the combined verified articulation + contact stack, driven by the EFA flow controller.
+
+## Reacher — the honest read
+
+**The thinking-dial is real on an articulated manipulation task** — reach climbs 63→90% as K grows,
 approaching the demonstrator; determinism bit-exact. The **K=1≥90% gate was not met (63%)** — the endpoint-precision
 gap at small torques (near the target the required torque is small and the flow's residual dominates) is what the
 extra integration steps close. Two findings recorded: (1) a **hard-clamped** PD is un-distillable (near-discontinuous
