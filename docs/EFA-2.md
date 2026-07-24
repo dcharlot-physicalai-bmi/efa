@@ -129,9 +129,28 @@ clearing 90% by K=2, bit-exact. The contrast with Reacher is itself the finding:
 demonstrator distills cleanly (loss 1e-4 → 96%) where Reacher's IK-elbow-discontinuous torque demonstrator does not
 (loss 5e-2 → 90% only at K=8) — *distillability is set by the smoothness of the demonstrator, not the task's contact
 complexity.* Honest scope: disc puck (oriented-box contact + rotation is next); kinematic pusher (position-controlled
-end-effector model); distills a scripted demonstrator; one seed. Next: couple the arm end-effector as the pusher →
-PushCube on the combined articulation + contact stack; then oriented-box contact + rotation; then match a specific
-published ManiSkill spec for a directly-comparable number.
+end-effector model); distills a scripted demonstrator; one seed.
+
+## FULL STACK — both verified layers composed (`experiments/efa2_pushcube_arm.rs`)
+
+The capstone of the port: the 2-link **arm** (articulation dynamics — M, Coriolis, RK4 from sim_planar) whose
+**fingertip pushes the puck** (contact + Coulomb friction from sim_contact) to a target. The fingertip is realized
+through the arm's own torque-controlled dynamics (computed-torque Jacobian resolved-rate control,
+`τ = M·Kv·(q̇_des − q̇) + bias`, `q̇_des = J⁺·v_ee`) — **not a kinematic point; the articulation is genuinely in the
+loop.** The EFA flow (obs → desired fingertip velocity, distilled from a scripted commander).
+
+| policy | reach (puck < 0.10) | mean final distance |
+|---|---|---|
+| scripted commander (full stack) | 100% | 0.043 |
+| **EFA flow K=1 / K=2 / K=4** | **100% / 100% / 100%** | 0.044 |
+
+**Both verified simulator layers compose into one manipulation task, and the EFA flow solves it at 100% from a single
+forward pass** (K=1) — bit-exact. K=1 is already 100% here (vs the free-pusher PushCube's 79% and Reacher's 63%)
+because the fingertip-*velocity* commander is smoother still than either the free-pusher-velocity or the torque map —
+the third confirmation of the distillability-follows-demonstrator-smoothness finding. Honest: disc puck (oriented-box
++ rotation next); the computed-torque controller tracks commanded fingertip velocity imperfectly near workspace
+boundaries, but the closed-loop task succeeds; one seed. Next: oriented-box contact + rotation (a real cube); on-policy
+DAgger for Reacher K=1 (the hybrid failed); match a specific published ManiSkill spec for a directly-comparable number.
 
 ## Reacher — the honest read
 
